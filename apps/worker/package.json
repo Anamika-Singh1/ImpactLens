@@ -1,0 +1,22 @@
+{
+  "name": "@impactlens/worker",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "nodemon --watch src --watch ../../packages/shared/dist --ext ts,js --exec ts-node src/main.ts",
+    "start": "node dist/main.js",
+    "check:redis": "node dist/main.js --check"
+  },
+  "dependencies": {
+    "@impactlens/shared": "0.1.0",
+    "bullmq": "^5.61.0",
+    "dotenv": "^16.6.1",
+    "ioredis": "^5.8.2",
+    "pino": "^9.14.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2"
+  }
+}

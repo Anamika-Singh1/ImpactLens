@@ -1,0 +1,37 @@
+{
+  "name": "impactlens",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "env:init": "node scripts/init-env.mjs",
+    "services:up": "docker compose up -d --wait",
+    "services:down": "docker compose down",
+    "db:generate": "npm run db:generate -w @impactlens/api",
+    "db:migrate": "npm run db:migrate -w @impactlens/api",
+    "build": "npm run build -w @impactlens/shared && npm run build -w @impactlens/analyzer && npm run build -w @impactlens/api && npm run build -w @impactlens/worker && npm run build -w @impactlens/web",
+    "dev": "npm run build -w @impactlens/shared && concurrently -k -n contracts,api,worker,web \"npm run dev -w @impactlens/shared\" \"npm run dev -w @impactlens/api\" \"npm run dev -w @impactlens/worker\" \"npm run dev -w @impactlens/web\"",
+    "test": "npm run build -w @impactlens/shared && npm run test --workspaces --if-present",
+    "test:e2e": "playwright test",
+    "check:env": "node scripts/check-env.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "overrides": {
+    "deepmerge-ts": "8.0.2"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.0",
+    "@types/node": "^22.19.0",
+    "concurrently": "^9.2.1",
+    "prettier": "3.6.2",
+    "prisma": "6.19.3",
+    "typescript": "~5.9.3"
+  }
+}
