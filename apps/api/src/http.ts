@@ -9,6 +9,7 @@ import {
 import { randomUUID } from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
 import type { Logger } from 'pino';
+import cookieParser from 'cookie-parser';
 @Catch()
 class ApiExceptionFilter implements ExceptionFilter {
   constructor(private readonly logger: Logger) {}
@@ -16,6 +17,7 @@ class ApiExceptionFilter implements ExceptionFilter {
     const response = host.switchToHttp().getResponse<Response>();
     const status =
       exception instanceof HttpException ? exception.getStatus() : 500;
+    if (status === 429) response.setHeader('Retry-After', '600');
     const body =
       exception instanceof HttpException ? exception.getResponse() : null;
     const message =
@@ -45,6 +47,7 @@ export function configureHttp(
   logger: Logger,
   origin: string,
 ) {
+  app.use(cookieParser());
   app.use((req: Request, res: Response, next: NextFunction) => {
     const supplied = req.header('x-request-id');
     const requestId =
@@ -53,6 +56,8 @@ export function configureHttp(
         : randomUUID();
     res.locals.requestId = requestId;
     res.setHeader('x-request-id', requestId);
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
     const start = performance.now();
     res.on('finish', () =>
       logger.info(
@@ -68,7 +73,11 @@ export function configureHttp(
     );
     next();
   });
-  app.enableCors({ origin, exposedHeaders: ['x-request-id'] });
+  app.enableCors({
+    origin,
+    credentials: true,
+    exposedHeaders: ['x-request-id'],
+  });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

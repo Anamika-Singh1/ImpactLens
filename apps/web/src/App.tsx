@@ -2,6 +2,11 @@ import { useEffect, useState } from 'react';
 import { NavLink, Route, Routes, Link } from 'react-router-dom';
 import type { HealthResponse } from '@impactlens/shared';
 import { fetchHealth } from './api';
+import { useAuth } from './session';
+import { AuthScreen } from './AuthScreen';
+import { WorkspaceSettings } from './WorkspaceSettings';
+import { Repositories } from './Repositories';
+import { CoreRecords } from './CoreRecords';
 const pages = [
   {
     path: '/repositories',
@@ -140,7 +145,7 @@ function Overview() {
             Understand potential change impact, then focus your review.
           </p>
         </div>
-        <span className="phase">Phase 1 · Foundation</span>
+        <span className="phase">Team workspace</span>
       </div>
       <Health />
       <div className="section-heading">
@@ -174,6 +179,9 @@ function Overview() {
   );
 }
 export function App() {
+  const { current, workspace, selectWorkspace, logout } = useAuth();
+  const [logoutError, setLogoutError] = useState('');
+  if (!current) return <AuthScreen />;
   return (
     <div className="layout">
       <aside>
@@ -196,59 +204,63 @@ export function App() {
           </NavLink>
         </nav>
         <div className="sidebar-footer">
-          <span className="dot" /> Local development<p>Foundation workspace</p>
+          <p>{current.user.name}</p>
+          <span className="tag">{workspace?.role}</span>
+          <button
+            onClick={() =>
+              void logout().catch((error) => setLogoutError(error.message))
+            }
+          >
+            Sign out
+          </button>
+          {logoutError && <p role="alert">{logoutError}</p>}
         </div>
       </aside>
       <main>
         <header className="topbar">
           <span>
-            Workspace <span className="slash">/</span> ImpactLens
+            Workspace <span className="slash">/</span>
+            <select
+              aria-label="Active workspace"
+              value={workspace?.id ?? ''}
+              onChange={(event) => selectWorkspace(event.target.value)}
+            >
+              {current.workspaces.map((w) => (
+                <option key={w.id} value={w.id}>
+                  {w.name}
+                </option>
+              ))}
+            </select>
           </span>
           <span className="tag">LOCAL</span>
         </header>
         <div className="content">
-          <Routes>
+          <Routes key={workspace?.id}>
             <Route path="/" element={<Overview />} />
-            {pages.map((page) => (
-              <Route
-                key={page.path}
-                path={page.path}
-                element={
-                  <>
-                    <p className="eyebrow">
-                      WORKSPACE / {page.title.toUpperCase()}
-                    </p>
-                    <h1>{page.title}</h1>
-                    <p className="subtitle">
-                      Build a review grounded in repository evidence.
-                    </p>
-                    <Empty title={page.empty} detail={page.detail} />
-                  </>
-                }
-              />
-            ))}
-            <Route
-              path="/settings"
-              element={
-                <>
-                  <p className="eyebrow">WORKSPACE / SETTINGS</p>
-                  <h1>Settings</h1>
-                  <p className="subtitle">Local workspace configuration.</p>
-                  <section className="panel">
-                    <h2>Connection</h2>
-                    <p>
-                      API path: <code>{import.meta.env.VITE_API_BASE_URL}</code>
-                    </p>
-                    <p className="muted">
-                      Server configuration is managed through local environment
-                      files. Provider integrations are not configured in this
-                      phase.
-                    </p>
-                  </section>
-                  <Health />
-                </>
-              }
-            />
+            <Route path="/repositories" element={<Repositories />} />
+            <Route path="/features" element={<CoreRecords kind="features" />} />
+            <Route path="/analyses" element={<CoreRecords kind="analyses" />} />
+            {pages
+              .filter((page) => page.path === '/test-evidence')
+              .map((page) => (
+                <Route
+                  key={page.path}
+                  path={page.path}
+                  element={
+                    <>
+                      <p className="eyebrow">
+                        WORKSPACE / {page.title.toUpperCase()}
+                      </p>
+                      <h1>{page.title}</h1>
+                      <p className="subtitle">
+                        Build a review grounded in repository evidence.
+                      </p>
+                      <Empty title={page.empty} detail={page.detail} />
+                    </>
+                  }
+                />
+              ))}
+            <Route path="/settings" element={<WorkspaceSettings />} />
             <Route
               path="*"
               element={

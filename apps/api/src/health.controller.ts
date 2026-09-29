@@ -1,8 +1,9 @@
-import { Controller, Get, Res } from '@nestjs/common';
+import { Controller, Get, Res, SetMetadata } from '@nestjs/common';
 import type { Response } from 'express';
 import type { HealthResponse } from '@impactlens/shared';
 import { DependenciesService } from './dependencies.service';
 @Controller('health')
+@SetMetadata('skipSession', true)
 export class HealthController {
   constructor(private readonly dependencies: DependenciesService) {}
   @Get('live')

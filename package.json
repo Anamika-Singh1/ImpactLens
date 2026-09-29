@@ -19,7 +19,9 @@
     "dev": "npm run build -w @impactlens/shared && concurrently -k -n contracts,api,worker,web \"npm run dev -w @impactlens/shared\" \"npm run dev -w @impactlens/api\" \"npm run dev -w @impactlens/worker\" \"npm run dev -w @impactlens/web\"",
     "test": "npm run build -w @impactlens/shared && npm run test --workspaces --if-present",
     "test:e2e": "playwright test",
+    "test:integration": "npm run build -w @impactlens/shared && npm run test:integration -w @impactlens/api",
     "check:env": "node scripts/check-env.mjs",
+    "check:migrations": "node scripts/check-migrations.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

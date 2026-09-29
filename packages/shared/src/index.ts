@@ -17,3 +17,16 @@ export interface ApiError {
   };
 }
 export const ANALYSIS_QUEUE = 'impactlens-analysis';
+
+export type WorkspaceRole = 'OWNER' | 'ENGINEER' | 'VIEWER';
+export interface WorkspaceSummary {
+  id: string;
+  name: string;
+  role: WorkspaceRole;
+}
+export interface CurrentUserResponse {
+  user: { id: string; email: string; name: string };
+  workspaces: WorkspaceSummary[];
+  csrfToken: string;
+  expiresAt: string;
+}

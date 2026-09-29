@@ -1,16 +1,408 @@
 generator client {
   provider = "prisma-client-js"
 }
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-// Repository import arrives in a later phase; this table is intentionally empty.
-model Repository {
+
+enum Role {
+  OWNER
+  ENGINEER
+  VIEWER
+}
+
+enum AnalysisStatus {
+  DRAFT
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum JobStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum FindingKind {
+  POTENTIAL_IMPACT
+  COVERAGE_LIMITATION
+  ANALYSIS_LIMITATION
+  SUGGESTION
+}
+
+enum EvidenceKind {
+  SOURCE
+  DEPENDENCY
+  FEATURE_MAPPING
+  TEST_RESULT
+  COVERAGE
+}
+
+enum TestOutcome {
+  PASSED
+  FAILED
+  SKIPPED
+  UNKNOWN
+}
+
+enum ReviewOutcome {
+  APPROVED
+  CHANGES_REQUESTED
+  ACKNOWLEDGED
+}
+
+model User {
+  id           String           @id @default(uuid()) @db.Uuid
+  email        String           @unique @db.VarChar(254)
+  name         String           @db.VarChar(100)
+  passwordHash String
+  createdAt    DateTime         @default(now())
+  sessions     Session[]
+  memberships  Membership[]
+  reviews      ReviewDecision[]
+  auditEvents  AuditEvent[]
+}
+
+model Session {
   id        String   @id @default(uuid()) @db.Uuid
-  owner     String
-  name      String
+  tokenHash String   @unique @db.Char(64)
+  csrfToken String   @db.VarChar(64)
+  userId    String?  @db.Uuid
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  @@unique([owner, name])
+  expiresAt DateTime
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Workspace {
+  id           String       @id @default(uuid()) @db.Uuid
+  name         String       @db.VarChar(100)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  memberships  Membership[]
+  repositories Repository[]
+  auditEvents  AuditEvent[]
+}
+
+model Membership {
+  workspaceId String    @db.Uuid
+  userId      String    @db.Uuid
+  role        Role
+  createdAt   DateTime  @default(now())
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([workspaceId, userId])
+  @@index([userId, workspaceId])
+}
+
+model Repository {
+  id          String               @id @default(uuid()) @db.Uuid
+  workspaceId String               @db.Uuid
+  owner       String               @db.VarChar(100)
+  name        String               @db.VarChar(100)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  workspace   Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  snapshots   RepositorySnapshot[]
+  features    BusinessFeature[]
+  analyses    Analysis[]
+  auditEvents AuditEvent[]
+
+  @@unique([id, workspaceId])
+  @@unique([workspaceId, owner, name])
+}
+
+model RepositorySnapshot {
+  id           String       @id @default(uuid()) @db.Uuid
+  workspaceId  String       @db.Uuid
+  repositoryId String       @db.Uuid
+  commitSha    String       @db.VarChar(64)
+  createdAt    DateTime     @default(now())
+  repository   Repository   @relation(fields: [repositoryId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+  files        SourceFile[]
+  evidence     Evidence[]
+  testRuns     TestRun[]
+  baseAnalyses Analysis[]   @relation("BaseSnapshot")
+  headAnalyses Analysis[]   @relation("HeadSnapshot")
+
+  @@unique([id, repositoryId, workspaceId])
+  @@unique([id, repositoryId, workspaceId, commitSha])
+  @@unique([workspaceId, repositoryId, commitSha])
+}
+
+model SourceFile {
+  id            String             @id @default(uuid()) @db.Uuid
+  workspaceId   String             @db.Uuid
+  repositoryId  String             @db.Uuid
+  snapshotId    String             @db.Uuid
+  path          String
+  contentHash   String             @db.Char(64)
+  language      String             @db.VarChar(30)
+  snapshot      RepositorySnapshot @relation(fields: [snapshotId, repositoryId, workspaceId], references: [id, repositoryId, workspaceId], onDelete: Cascade)
+  symbols       SourceSymbol[]
+  outgoingEdges DependencyEdge[]   @relation("FromFile")
+  incomingEdges DependencyEdge[]   @relation("ToFile")
+  mappings      FeatureMapping[]
+
+  @@unique([id, snapshotId, repositoryId, workspaceId])
+  @@unique([workspaceId, repositoryId, snapshotId, path])
+}
+
+model SourceSymbol {
+  id           String     @id @default(uuid()) @db.Uuid
+  workspaceId  String     @db.Uuid
+  repositoryId String     @db.Uuid
+  snapshotId   String     @db.Uuid
+  fileId       String     @db.Uuid
+  name         String
+  kind         String     @db.VarChar(50)
+  startLine    Int
+  endLine      Int
+  file         SourceFile @relation(fields: [fileId, snapshotId, repositoryId, workspaceId], references: [id, snapshotId, repositoryId, workspaceId], onDelete: Cascade)
+
+  @@unique([workspaceId, repositoryId, snapshotId, fileId, name, startLine, kind])
+}
+
+model DependencyEdge {
+  id           String      @id @default(uuid()) @db.Uuid
+  workspaceId  String      @db.Uuid
+  repositoryId String      @db.Uuid
+  snapshotId   String      @db.Uuid
+  fromFileId   String      @db.Uuid
+  toFileId     String?     @db.Uuid
+  specifier    String
+  kind         String      @db.VarChar(50)
+  line         Int
+  limitation   String?
+  fromFile     SourceFile  @relation("FromFile", fields: [fromFileId, snapshotId, repositoryId, workspaceId], references: [id, snapshotId, repositoryId, workspaceId], onDelete: Cascade)
+  toFile       SourceFile? @relation("ToFile", fields: [toFileId, snapshotId, repositoryId, workspaceId], references: [id, snapshotId, repositoryId, workspaceId], onDelete: NoAction)
+
+  @@unique([workspaceId, repositoryId, snapshotId, fromFileId, specifier, line, kind])
+  @@index([workspaceId, repositoryId, snapshotId, toFileId])
+}
+
+model BusinessFeature {
+  id           String           @id @default(uuid()) @db.Uuid
+  workspaceId  String           @db.Uuid
+  repositoryId String           @db.Uuid
+  key          String           @db.VarChar(100)
+  name         String           @db.VarChar(150)
+  description  String?
+  createdAt    DateTime         @default(now())
+  repository   Repository       @relation(fields: [repositoryId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+  mappings     FeatureMapping[]
+  findings     Finding[]
+
+  @@unique([id, repositoryId, workspaceId])
+  @@unique([workspaceId, repositoryId, key])
+}
+
+model FeatureMapping {
+  id           String          @id @default(uuid()) @db.Uuid
+  workspaceId  String          @db.Uuid
+  repositoryId String          @db.Uuid
+  featureId    String          @db.Uuid
+  snapshotId   String          @db.Uuid
+  fileId       String          @db.Uuid
+  rationale    String
+  feature      BusinessFeature @relation(fields: [featureId, repositoryId, workspaceId], references: [id, repositoryId, workspaceId], onDelete: Cascade)
+  file         SourceFile      @relation(fields: [fileId, snapshotId, repositoryId, workspaceId], references: [id, snapshotId, repositoryId, workspaceId], onDelete: Cascade)
+
+  @@unique([workspaceId, repositoryId, featureId, snapshotId, fileId])
+}
+
+model Analysis {
+  id              String               @id @default(uuid()) @db.Uuid
+  workspaceId     String               @db.Uuid
+  repositoryId    String               @db.Uuid
+  baseSnapshotId  String               @db.Uuid
+  headSnapshotId  String               @db.Uuid
+  status          AnalysisStatus       @default(DRAFT)
+  createdAt       DateTime             @default(now())
+  repository      Repository           @relation(fields: [repositoryId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+  baseSnapshot    RepositorySnapshot   @relation("BaseSnapshot", fields: [baseSnapshotId, repositoryId, workspaceId], references: [id, repositoryId, workspaceId], onDelete: NoAction)
+  headSnapshot    RepositorySnapshot   @relation("HeadSnapshot", fields: [headSnapshotId, repositoryId, workspaceId], references: [id, repositoryId, workspaceId], onDelete: NoAction)
+  jobs            AnalysisJob[]
+  findings        Finding[]
+  recommendations TestRecommendation[]
+  reviews         ReviewDecision[]
+
+  @@unique([id, repositoryId, workspaceId])
+  @@index([workspaceId, repositoryId, createdAt])
+}
+
+model AnalysisJob {
+  id           String    @id @default(uuid()) @db.Uuid
+  workspaceId  String    @db.Uuid
+  repositoryId String    @db.Uuid
+  analysisId   String    @db.Uuid
+  queueJobId   String    @unique
+  status       JobStatus @default(QUEUED)
+  attempts     Int       @default(0)
+  createdAt    DateTime  @default(now())
+  analysis     Analysis  @relation(fields: [analysisId, repositoryId, workspaceId], references: [id, repositoryId, workspaceId], onDelete: Cascade)
+
+  @@index([workspaceId, repositoryId, analysisId, status])
+}
+
+model Finding {
+  id            String            @id @default(uuid()) @db.Uuid
+  workspaceId   String            @db.Uuid
+  repositoryId  String            @db.Uuid
+  analysisId    String            @db.Uuid
+  featureId     String?           @db.Uuid
+  kind          FindingKind
+  summary       String
+  analysis      Analysis          @relation(fields: [analysisId, repositoryId, workspaceId], references: [id, repositoryId, workspaceId], onDelete: Cascade)
+  feature       BusinessFeature?  @relation(fields: [featureId, repositoryId, workspaceId], references: [id, repositoryId, workspaceId], onDelete: NoAction)
+  evidenceLinks FindingEvidence[]
+
+  @@unique([id, repositoryId, workspaceId])
+  @@index([workspaceId, repositoryId, analysisId])
+}
+
+model Evidence {
+  id                  String                   @id @default(uuid()) @db.Uuid
+  workspaceId         String                   @db.Uuid
+  repositoryId        String                   @db.Uuid
+  snapshotId          String                   @db.Uuid
+  commitSha           String                   @db.VarChar(64)
+  kind                EvidenceKind
+  locator             String
+  contentHash         String                   @db.Char(64)
+  details             Json
+  createdAt           DateTime                 @default(now())
+  snapshot            RepositorySnapshot       @relation(fields: [snapshotId, repositoryId, workspaceId, commitSha], references: [id, repositoryId, workspaceId, commitSha], onDelete: Cascade)
+  findingLinks        FindingEvidence[]
+  recommendationLinks RecommendationEvidence[]
+
+  @@unique([id, repositoryId, workspaceId])
+  @@index([workspaceId, repositoryId, snapshotId, kind])
+}
+
+model FindingEvidence {
+  workspaceId  String   @db.Uuid
+  repositoryId String   @db.Uuid
+  findingId    String   @db.Uuid
+  evidenceId   String   @db.Uuid
+  finding      Finding  @relation(fields: [findingId, repositoryId, workspaceId], references: [id, repositoryId, workspaceId], onDelete: Cascade)
+  evidence     Evidence @relation(fields: [evidenceId, repositoryId, workspaceId], references: [id, repositoryId, workspaceId], onDelete: NoAction)
+
+  @@id([findingId, evidenceId])
+  @@index([workspaceId, repositoryId, evidenceId])
+}
+
+model TestRun {
+  id            String             @id @default(uuid()) @db.Uuid
+  workspaceId   String             @db.Uuid
+  repositoryId  String             @db.Uuid
+  snapshotId    String             @db.Uuid
+  provider      String             @db.VarChar(100)
+  externalRunId String
+  outcome       TestOutcome        @default(UNKNOWN)
+  importedAt    DateTime           @default(now())
+  snapshot      RepositorySnapshot @relation(fields: [snapshotId, repositoryId, workspaceId], references: [id, repositoryId, workspaceId], onDelete: Cascade)
+  cases         TestCase[]
+  coverage      CoverageArtifact[]
+
+  @@unique([id, repositoryId, workspaceId])
+  @@unique([workspaceId, repositoryId, snapshotId, provider, externalRunId])
+}
+
+model TestCase {
+  id              String               @id @default(uuid()) @db.Uuid
+  workspaceId     String               @db.Uuid
+  repositoryId    String               @db.Uuid
+  testRunId       String               @db.Uuid
+  identity        String
+  name            String
+  path            String?
+  outcome         TestOutcome          @default(UNKNOWN)
+  testRun         TestRun              @relation(fields: [testRunId, repositoryId, workspaceId], references: [id, repositoryId, workspaceId], onDelete: Cascade)
+  recommendations TestRecommendation[]
+
+  @@unique([id, repositoryId, workspaceId])
+  @@unique([workspaceId, repositoryId, testRunId, identity])
+}
+
+model CoverageArtifact {
+  id           String   @id @default(uuid()) @db.Uuid
+  workspaceId  String   @db.Uuid
+  repositoryId String   @db.Uuid
+  testRunId    String   @db.Uuid
+  format       String   @db.VarChar(50)
+  storageKey   String
+  contentHash  String   @db.Char(64)
+  importedAt   DateTime @default(now())
+  testRun      TestRun  @relation(fields: [testRunId, repositoryId, workspaceId], references: [id, repositoryId, workspaceId], onDelete: Cascade)
+
+  @@unique([workspaceId, repositoryId, testRunId, contentHash])
+}
+
+model TestRecommendation {
+  id            String                   @id @default(uuid()) @db.Uuid
+  workspaceId   String                   @db.Uuid
+  repositoryId  String                   @db.Uuid
+  analysisId    String                   @db.Uuid
+  testCaseId    String?                  @db.Uuid
+  isSuggestion  Boolean                  @default(false)
+  rationale     String
+  analysis      Analysis                 @relation(fields: [analysisId, repositoryId, workspaceId], references: [id, repositoryId, workspaceId], onDelete: Cascade)
+  testCase      TestCase?                @relation(fields: [testCaseId, repositoryId, workspaceId], references: [id, repositoryId, workspaceId], onDelete: NoAction)
+  evidenceLinks RecommendationEvidence[]
+
+  @@unique([id, repositoryId, workspaceId])
+  @@index([workspaceId, repositoryId, analysisId])
+}
+
+model RecommendationEvidence {
+  workspaceId      String             @db.Uuid
+  repositoryId     String             @db.Uuid
+  recommendationId String             @db.Uuid
+  evidenceId       String             @db.Uuid
+  recommendation   TestRecommendation @relation(fields: [recommendationId, repositoryId, workspaceId], references: [id, repositoryId, workspaceId], onDelete: Cascade)
+  evidence         Evidence           @relation(fields: [evidenceId, repositoryId, workspaceId], references: [id, repositoryId, workspaceId], onDelete: NoAction)
+
+  @@id([recommendationId, evidenceId])
+  @@index([workspaceId, repositoryId, evidenceId])
+}
+
+model ReviewDecision {
+  id           String        @id @default(uuid()) @db.Uuid
+  workspaceId  String        @db.Uuid
+  repositoryId String        @db.Uuid
+  analysisId   String        @db.Uuid
+  reviewerId   String        @db.Uuid
+  outcome      ReviewOutcome
+  comment      String?
+  createdAt    DateTime      @default(now())
+  analysis     Analysis      @relation(fields: [analysisId, repositoryId, workspaceId], references: [id, repositoryId, workspaceId], onDelete: Cascade)
+  reviewer     User          @relation(fields: [reviewerId], references: [id], onDelete: Restrict)
+
+  @@index([workspaceId, repositoryId, analysisId, createdAt])
+}
+
+model AuditEvent {
+  id           String      @id @default(uuid()) @db.Uuid
+  workspaceId  String      @db.Uuid
+  repositoryId String?     @db.Uuid
+  actorId      String?     @db.Uuid
+  action       String      @db.VarChar(100)
+  targetId     String?
+  requestId    String?     @db.VarChar(64)
+  createdAt    DateTime    @default(now())
+  workspace    Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  repository   Repository? @relation(fields: [repositoryId, workspaceId], references: [id, workspaceId], onDelete: NoAction)
+  actor        User?       @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, createdAt])
+  @@index([workspaceId, repositoryId, createdAt])
 }

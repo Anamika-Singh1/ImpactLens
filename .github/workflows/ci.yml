@@ -15,8 +15,10 @@ jobs:
       - run: npm run services:up
       - run: npm run db:generate
       - run: npm run db:migrate
+      - run: npm run check:migrations
       - run: npm run build
       - run: npm test
+      - run: npm run test:integration
       - run: npm run check:env
       - run: npm run check:redis -w @impactlens/worker
       - run: npx playwright install --with-deps chromium

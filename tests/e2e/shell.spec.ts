@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 test('shell reaches the real API and navigates to honest empty states', async ({
   page,
 }) => {

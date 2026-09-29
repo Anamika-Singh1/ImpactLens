@@ -4,7 +4,7 @@ import { Body, Controller, Post, type INestApplication } from '@nestjs/common';
 import { IsString } from 'class-validator';
 import request from 'supertest';
 import pino from 'pino';
-import { AppModule } from '../src/app.module';
+import { HealthController } from '../src/health.controller';
 import { DependenciesService } from '../src/dependencies.service';
 import { configureHttp } from '../src/http';
 class ValidationDto {
@@ -21,8 +21,8 @@ describe('HTTP foundation', () => {
   const check = jest.fn();
   beforeAll(async () => {
     const module = await Test.createTestingModule({
-      imports: [AppModule],
-      controllers: [ValidationProbe],
+      controllers: [ValidationProbe, HealthController],
+      providers: [DependenciesService],
     })
       .overrideProvider(DependenciesService)
       .useValue({ check })

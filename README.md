@@ -1,6 +1,6 @@
 # ImpactLens
 
-Evidence-backed release review for JavaScript and TypeScript repositories. Phase 1 provides the foundation. Repository import, analysis, evidence ingestion, and reports are not implemented yet. There are no seeded metrics or customer records.
+Evidence-backed release review for JavaScript and TypeScript repositories. Phase 2 adds authenticated workspaces, backend role enforcement, and the related data model. Repository metadata and business features can be recorded; GitHub import, analysis execution, evidence ingestion, and reports remain deferred. There are no seeded metrics or customer records.
 
 ## Windows PowerShell setup
 
@@ -24,6 +24,8 @@ Open http://localhost:5173. API: http://127.0.0.1:3000. Vite forwards `/api` req
 ```powershell
 npm.cmd run build
 npm.cmd test
+npm.cmd run test:integration
+npm.cmd run check:migrations
 npm.cmd run check:env
 npm.cmd run check:redis -w @impactlens/worker
 npx.cmd playwright install chromium
@@ -51,4 +53,6 @@ Liveness returns 200 when the process is serving. Readiness runs a PostgreSQL qu
 
 Use the tracked `package-lock.json` with `npm ci` for reproducible installs. This initial backend uses NestJS 11, Prisma 6.19, and TypeScript 5.9. Compatibility references: [Prisma 6 requirements](https://docs.prisma.io/docs/orm/v6/reference/system-requirements) and [Vite setup](https://vite.dev/guide/).
 
-See [Phase 1 notes](docs/phase-1.md) for decisions, limitations, and manual acceptance.
+Start at **http://localhost:5173**, matching the default API WEB_ORIGIN. Register to create an Owner workspace; Owners can add already registered teammates as Engineer or Viewer through Settings. Cookies hold opaque HttpOnly sessions; authentication tokens are never stored in localStorage.
+
+See [Phase 2 setup, permissions, and acceptance](docs/phase-2.md), [the ER diagram and database constraints](docs/data-model.md), and the historical [Phase 1 notes](docs/phase-1.md).
