@@ -88,8 +88,12 @@ describe('repository URL to indexed overview with isolated owned source', () => 
     imports = app.get(ImportsService);
     const addUrl = imports.addUrl.bind(imports);
     jest.spyOn(imports, 'addUrl').mockImplementation(async (...args) => {
-      try { return await addUrl(...args); }
-      catch (error) { console.error(error); throw error; }
+      try {
+        return await addUrl(...args);
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
     });
     jest
       .spyOn(

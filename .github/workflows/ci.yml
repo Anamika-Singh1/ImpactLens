@@ -37,7 +37,8 @@ jobs:
       - run: npm run lint
       - run: npm run format:check
       - run: npm run env:init
-      - run: npm run services:up
+      - id: services
+        run: npm run services:up
       - run: npm run db:generate
       - run: npm run db:migrate
       - run: npm run check:migrations
@@ -50,5 +51,5 @@ jobs:
       - run: npm run check:redis -w @impactlens/worker
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
-      - if: always()
+      - if: ${{ always() && (steps.services.outcome == 'success' || steps.services.outcome == 'failure') }}
         run: docker compose down
