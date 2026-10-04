@@ -12,6 +12,9 @@ import { AuthRateLimit } from '../src/auth/rate-limit.service';
 import { configureHttp } from '../src/http';
 import { readConfig } from '../src/config';
 import { allowed, permissions } from '../src/auth/security';
+import { analyzeSnapshot } from '@impactlens/analyzer';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 type Actor = {
   agent: ReturnType<typeof request.agent>;
@@ -190,6 +193,551 @@ describe('Phase 2 real PostgreSQL/Redis integration', () => {
         where: { tokenHash: createHash('sha256').update(token).digest('hex') },
       }),
     ).not.toBeNull();
+  });
+  it('persists isolated snapshot graphs and enforces explorer read/write permissions', async () => {
+    await db.sourceFile.update({
+      where: { id: fileId },
+      data: {
+        contentText: 'export function App() { return 1; }\nimport(target);',
+      },
+    });
+    const root = `/workspaces/${owner.workspaceId}/repositories/${repositoryId}/snapshots`;
+    const graphPath = `${root}/${snapshotId}/graph`;
+    await request(app.getHttpServer())
+      .get('/api' + graphPath)
+      .expect(401);
+    await outsider.agent.get('/api' + graphPath).expect(404);
+    await mutation(viewer, 'post', graphPath).send({}).expect(403);
+    await owner.agent
+      .post('/api' + graphPath)
+      .send({})
+      .expect(403);
+    expect(
+      (await viewer.agent.get('/api' + graphPath).expect(200)).body.graph,
+    ).toBeNull();
+    const analyzed = await mutation(engineer, 'post', graphPath)
+      .send({})
+      .expect(201);
+    expect(analyzed.body.graph.nodes).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: 'FUNCTION', name: 'App' }),
+      ]),
+    );
+    expect(analyzed.body.graph.edges).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: 'DYNAMIC_IMPORT', to: null }),
+      ]),
+    );
+    const persisted = await viewer.agent.get('/api' + graphPath).expect(200);
+    expect(persisted.body.graph).toEqual(analyzed.body.graph);
+    expect(
+      (await viewer.agent.get('/api' + root).expect(200)).body[0].staticGraph
+        .version,
+    ).toBe('4.0.0');
+    const files = await viewer.agent
+      .get(`/api${root}/${snapshotId}/files`)
+      .expect(200);
+    expect(files.body[0].contentText).toBeUndefined();
+    expect(
+      (
+        await viewer.agent
+          .get(`/api${root}/${snapshotId}/files/${fileId}`)
+          .expect(200)
+      ).body.contentText,
+    ).toContain('export function App');
+    await viewer.agent
+      .get(`/api${root}/${foreignSnapshotId}/graph`)
+      .expect(404);
+    await viewer.agent
+      .get(`/api${root}/${foreignSnapshotId}/files/${fileId}`)
+      .expect(404);
+    await mutation(owner, 'post', `${root}/${foreignSnapshotId}/graph`)
+      .send({})
+      .expect(404);
+    const rerun = await mutation(owner, 'post', graphPath).send({}).expect(201);
+    expect(rerun.body.graph).toEqual(persisted.body.graph);
+    expect(await db.staticGraph.count({ where: { snapshotId } })).toBe(1);
+    await expect(
+      db.staticGraph.create({
+        data: {
+          snapshotId: foreignSnapshotId,
+          repositoryId,
+          workspaceId: owner.workspaceId,
+          version: 'test',
+          graph: {},
+        },
+      }),
+    ).rejects.toMatchObject({ code: 'P2003' });
+  });
+  it('manages features, explicit suggestions, stale review, immutable history and tenant isolation', async () => {
+    const scope = { workspaceId: owner.workspaceId, repositoryId };
+    async function snapshotFixture(name: string, sha: string) {
+      const contents: Record<string, string> = JSON.parse(
+        readFileSync(
+          resolve(
+            __dirname,
+            '../../../fixtures/feature-mapping/' + name + '.json',
+          ),
+          'utf8',
+        ),
+      );
+      const files = Object.entries(contents).map(([path, contentText]) => ({
+        path,
+        contentText,
+      }));
+      const graph = analyzeSnapshot({ commitSha: sha.repeat(40), files });
+      const snapshot = await db.repositorySnapshot.create({
+        data: { ...scope, commitSha: graph.commitSha },
+      });
+      await db.sourceFile.createMany({
+        data: files.map((f) => ({
+          ...f,
+          ...scope,
+          snapshotId: snapshot.id,
+          contentHash: createHash('sha256').update(f.contentText).digest('hex'),
+          language: 'typescript',
+        })),
+      });
+      await db.staticGraph.create({
+        data: {
+          ...scope,
+          snapshotId: snapshot.id,
+          version: graph.version,
+          graph: JSON.parse(JSON.stringify(graph)),
+        },
+      });
+      return {
+        snapshot,
+        graph,
+        files: await db.sourceFile.findMany({
+          where: { ...scope, snapshotId: snapshot.id },
+        }),
+      };
+    }
+    const base = await snapshotFixture('base', 'c'),
+      moved = await snapshotFixture('moved', 'd');
+    const root = `/workspaces/${owner.workspaceId}/repositories/${repositoryId}/features`;
+    const create = {
+      name: 'Checkout',
+      description: 'Place an order',
+      criticality: 'CRITICAL',
+      responsibleTeam: 'Payments',
+      customerWorkflow: 'Customer completes checkout',
+      key: 'phase5-checkout',
+    };
+    const created = await mutation(engineer, 'post', root)
+      .send(create)
+      .expect(201);
+    const featureId = created.body.id,
+      url = `${root}/${featureId}`;
+    await mutation(viewer, 'patch', url)
+      .send({ ...create, expectedVersion: 1 })
+      .expect(403);
+    await mutation(engineer, 'patch', url)
+      .send({ ...create, name: 'Checkout and payment', expectedVersion: 1 })
+      .expect(200);
+    await mutation(engineer, 'patch', url)
+      .send({ ...create, expectedVersion: 1 })
+      .expect(409);
+    await mutation(engineer, 'patch', url)
+      .send({ ...create, criticality: 'INVALID', expectedVersion: 2 })
+      .expect(400);
+    const initial = (await viewer.agent.get('/api' + url).expect(200)).body;
+    expect(initial).toMatchObject({
+      name: 'Checkout and payment',
+      criticality: 'CRITICAL',
+      responsibleTeam: 'Payments',
+      customerWorkflow: create.customerWorkflow,
+      description: create.description,
+    });
+    const file = base.files.find((f) => f.path === 'src/checkout.ts')!;
+    const target = base.graph.nodes.find(
+      (n) => n.kind === 'FUNCTION' && n.name === 'checkout',
+    )!;
+    const manual = (
+      await mutation(engineer, 'post', `${url}/mappings`)
+        .send({
+          snapshotId: base.snapshot.id,
+          fileId: file.id,
+          nodeId: target.id,
+          rationale: 'Places the customer order',
+        })
+        .expect(201)
+    ).body;
+    expect(manual).toMatchObject({
+      status: 'CONFIRMED',
+      confirmedById: engineer.userId,
+      snapshotId: base.snapshot.id,
+      origin: 'MANUAL',
+    });
+    const suggestionRun = await mutation(engineer, 'post', `${url}/suggestions`)
+      .send({ snapshotId: base.snapshot.id })
+      .expect(201);
+    expect(suggestionRun.body.created).toBeGreaterThan(0);
+    let detail = (
+      await viewer.agent
+        .get(`/api${url}?snapshotId=${base.snapshot.id}`)
+        .expect(200)
+    ).body;
+    const suggestion = detail.mappings.find(
+      (m: any) => m.status === 'SUGGESTED' && m.target.kind === 'ROUTE',
+    );
+    const reject = detail.mappings.find(
+      (m: any) =>
+        m.status === 'SUGGESTED' && m.target.id === 'file:src/checkout.ts',
+    );
+    expect(suggestion.confirmedAt).toBeNull();
+    expect(suggestion.heuristic.explanation).toContain('Unconfirmed');
+    expect(detail.linkedTests).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ path: 'tests/checkout.test.ts', cases: [] }),
+      ]),
+    );
+    const run = await db.testRun.create({
+      data: {
+        ...scope,
+        snapshotId: base.snapshot.id,
+        provider: 'fixture',
+        externalRunId: randomUUID(),
+        outcome: 'PASSED',
+      },
+    });
+    await db.testCase.create({
+      data: {
+        ...scope,
+        testRunId: run.id,
+        identity: 'checkout',
+        name: 'places order',
+        path: 'tests/checkout.test.ts',
+        outcome: 'PASSED',
+      },
+    });
+    detail = (
+      await viewer.agent
+        .get(`/api${url}?snapshotId=${base.snapshot.id}`)
+        .expect(200)
+    ).body;
+    expect(detail.linkedTests[0].cases[0].outcome).toBe('PASSED');
+    const edited = (
+      await mutation(engineer, 'patch', `${url}/mappings/${suggestion.id}`)
+        .send({
+          snapshotId: base.snapshot.id,
+          fileId: suggestion.fileId,
+          nodeId: suggestion.nodeId,
+          rationale: 'HTTP checkout registration reviewed',
+          expectedVersion: suggestion.version,
+        })
+        .expect(200)
+    ).body;
+    expect(edited.status).toBe('SUGGESTED');
+    expect(edited.confirmedById).toBeNull();
+    await mutation(viewer, 'post', `${url}/mappings/${suggestion.id}/review`)
+      .send({
+        action: 'CONFIRM',
+        expectedVersion: edited.version,
+        snapshotId: base.snapshot.id,
+      })
+      .expect(403);
+    await mutation(owner, 'post', `${url}/mappings/${suggestion.id}/review`)
+      .send({
+        action: 'CONFIRM',
+        expectedVersion: suggestion.version,
+        snapshotId: base.snapshot.id,
+      })
+      .expect(409);
+    await mutation(owner, 'post', `${url}/mappings/${suggestion.id}/review`)
+      .send({
+        action: 'CONFIRM',
+        expectedVersion: edited.version,
+        snapshotId: base.snapshot.id,
+        confirmedById: engineer.userId,
+      })
+      .expect(400);
+    const accepted = (
+      await mutation(owner, 'post', `${url}/mappings/${suggestion.id}/review`)
+        .send({
+          action: 'CONFIRM',
+          expectedVersion: edited.version,
+          snapshotId: base.snapshot.id,
+        })
+        .expect(201)
+    ).body;
+    expect(accepted.confirmedById).toBe(owner.userId);
+    await mutation(owner, 'post', `${url}/mappings/${reject.id}/review`)
+      .send({ action: 'REJECT', expectedVersion: reject.version })
+      .expect(201);
+    expect(
+      (
+        await mutation(owner, 'post', `${url}/suggestions`)
+          .send({ snapshotId: base.snapshot.id })
+          .expect(201)
+      ).body.created,
+    ).toBe(0);
+    detail = (
+      await viewer.agent
+        .get(`/api${url}?snapshotId=${moved.snapshot.id}`)
+        .expect(200)
+    ).body;
+    expect(
+      detail.mappings.find((m: any) => m.id === manual.id).resolution.status,
+    ).toBe('STALE');
+    expect(
+      detail.mappings.find((m: any) => m.id === manual.id).confirmedById,
+    ).toBe(engineer.userId);
+    expect(
+      (await viewer.agent.get('/api' + root).expect(200)).body.find(
+        (f: any) => f.id === featureId,
+      ).mappingCounts.stale,
+    ).toBeGreaterThan(0);
+    await mutation(owner, 'post', `${url}/mappings/${manual.id}/review`)
+      .send({
+        action: 'CONFIRM',
+        expectedVersion: manual.version,
+        snapshotId: moved.snapshot.id,
+      })
+      .expect(400);
+    const replacement = moved.graph.nodes.find(
+      (n) => n.kind === 'FUNCTION' && n.name === 'checkout',
+    )!;
+    const replacementFile = moved.files.find(
+      (f) => f.path === replacement.filePath,
+    )!;
+    const rebound = (
+      await mutation(owner, 'patch', `${url}/mappings/${manual.id}`)
+        .send({
+          expectedVersion: manual.version,
+          snapshotId: moved.snapshot.id,
+          fileId: replacementFile.id,
+          nodeId: replacement.id,
+          rationale: 'Reviewed move to payments directory',
+        })
+        .expect(200)
+    ).body;
+    expect(rebound.status).toBe('SUGGESTED');
+    expect(rebound.confirmedById).toBeNull();
+    await mutation(owner, 'post', `${url}/mappings/${manual.id}/review`)
+      .send({
+        action: 'CONFIRM',
+        expectedVersion: rebound.version,
+        snapshotId: moved.snapshot.id,
+      })
+      .expect(201);
+    detail = (
+      await viewer.agent
+        .get(`/api${url}?snapshotId=${moved.snapshot.id}`)
+        .expect(200)
+    ).body;
+    const remapped = detail.mappings.find((m: any) => m.id === manual.id);
+    expect(remapped.resolution.status).toBe('RESOLVED');
+    expect(remapped.history.map((h: any) => h.action)).toEqual([
+      'CONFIRMED',
+      'EDITED_FOR_REVIEW',
+      'MANUAL_CONFIRMED',
+    ]);
+    expect(remapped.history[2].state.snapshotId).toBe(base.snapshot.id);
+    expect(remapped.history[2].state.confirmedById).toBe(engineer.userId);
+    await expect(
+      db.mappingRevision.update({
+        where: { id: remapped.history[2].id },
+        data: { state: {} },
+      }),
+    ).rejects.toThrow();
+    await expect(
+      db.mappingRevision.delete({ where: { id: remapped.history[2].id } }),
+    ).rejects.toThrow();
+    const otherRepo = await db.repository.create({
+      data: {
+        workspaceId: owner.workspaceId,
+        owner: 'isolation',
+        name: 'phase5',
+      },
+    });
+    await viewer.agent
+      .get(
+        `/api/workspaces/${owner.workspaceId}/repositories/${otherRepo.id}/features/${featureId}`,
+      )
+      .expect(404);
+    await outsider.agent.get('/api' + url).expect(404);
+    await viewer.agent
+      .get(`/api${url}?snapshotId=${foreignSnapshotId}`)
+      .expect(404);
+    await mutation(owner, 'post', `${url}/suggestions`)
+      .send({ snapshotId: foreignSnapshotId })
+      .expect(404);
+    await mutation(owner, 'post', `${url}/mappings`)
+      .send({
+        snapshotId: foreignSnapshotId,
+        fileId,
+        rationale: 'Cross-tenant',
+      })
+      .expect(404);
+    await mutation(owner, 'patch', `${url}/mappings/${manual.id}`)
+      .send({
+        expectedVersion: remapped.version,
+        snapshotId: base.snapshot.id,
+        fileId: replacementFile.id,
+        rationale: 'Mismatched file snapshot',
+      })
+      .expect(404);
+    const foreignFeature = await db.businessFeature.create({
+      data: {
+        workspaceId: outsider.workspaceId,
+        repositoryId: foreignRepositoryId,
+        key: 'phase5',
+        name: 'Foreign',
+      },
+    });
+    await mutation(
+      owner,
+      'post',
+      `${root}/${foreignFeature.id}/mappings/${manual.id}/review`,
+    )
+      .send({ action: 'REJECT', expectedVersion: remapped.version })
+      .expect(404);
+    await expect(
+      db.mappingRevision.create({
+        data: {
+          mappingId: manual.id,
+          workspaceId: outsider.workspaceId,
+          repositoryId: foreignRepositoryId,
+          revision: 99,
+          action: 'INVALID',
+          actorLabel: 'invalid',
+          snapshotId: foreignSnapshotId,
+          state: {},
+        },
+      }),
+    ).rejects.toMatchObject({ code: 'P2003' });
+  }, 60000);
+  it('saves reproducible impact comparisons with review evidence and tenant isolation', async () => {
+    const scope = { workspaceId: owner.workspaceId, repositoryId };
+    const snapshots: { id: string; fileId: string; nodeId: string }[] = [];
+    for (const [index, value] of [1, 2].entries()) {
+      const commitSha = String(index + 7).repeat(40);
+      const files = [
+        {
+          path: 'checkout.ts',
+          contentText: `export function checkout() { return ${value}; }`,
+        },
+      ];
+      const graph = analyzeSnapshot({ commitSha, files });
+      const snapshot = await db.repositorySnapshot.create({
+        data: { ...scope, commitSha },
+      });
+      const file = await db.sourceFile.create({
+        data: {
+          ...scope,
+          snapshotId: snapshot.id,
+          ...files[0]!,
+          contentHash: createHash('sha256')
+            .update(files[0]!.contentText)
+            .digest('hex'),
+          language: 'typescript',
+        },
+      });
+      await db.staticGraph.create({
+        data: {
+          ...scope,
+          snapshotId: snapshot.id,
+          version: graph.version,
+          graph: JSON.parse(JSON.stringify(graph)),
+        },
+      });
+      snapshots.push({
+        id: snapshot.id,
+        fileId: file.id,
+        nodeId: graph.nodes.find((n) => n.kind === 'FUNCTION')!.id,
+      });
+    }
+    const root = `/workspaces/${owner.workspaceId}/repositories/${repositoryId}`;
+    const feature = await mutation(engineer, 'post', root + '/features')
+      .send({ name: 'Comparison checkout', criticality: 'CRITICAL' })
+      .expect(201);
+    const mapped = await mutation(
+      engineer,
+      'post',
+      `${root}/features/${feature.body.id}/mappings`,
+    )
+      .send({
+        snapshotId: snapshots[0]!.id,
+        fileId: snapshots[0]!.fileId,
+        nodeId: snapshots[0]!.nodeId,
+        rationale: 'Checkout implementation',
+      })
+      .expect(201);
+    const body = {
+      baseSnapshotId: snapshots[0]!.id,
+      headSnapshotId: snapshots[1]!.id,
+    };
+    await mutation(viewer, 'post', root + '/comparisons')
+      .send(body)
+      .expect(403);
+    await mutation(engineer, 'post', root + '/comparisons')
+      .send({ ...body, headSnapshotId: foreignSnapshotId })
+      .expect(404);
+    await mutation(engineer, 'post', root + '/comparisons')
+      .send({ ...body, actorId: owner.userId })
+      .expect(400);
+    await engineer.agent
+      .post('/api' + root + '/comparisons')
+      .send(body)
+      .expect(403);
+    const created = await mutation(engineer, 'post', root + '/comparisons')
+      .send(body)
+      .expect(201);
+    expect(created.body.input).toBeUndefined();
+    expect(created.body.result.changes).toHaveLength(1);
+    expect(created.body.result.features).toContainEqual(
+      expect.objectContaining({
+        featureId: feature.body.id,
+        kind: 'DIRECT',
+        confidence: 'LIMITED',
+      }),
+    );
+    const stored = await db.analysis.findUniqueOrThrow({
+      where: { id: created.body.id },
+    });
+    const { analyzeImpact, impactHash } = await import('@impactlens/analyzer');
+    expect(impactHash(stored.input)).toBe(stored.inputHash);
+    expect(impactHash(analyzeImpact(stored.input as never))).toBe(
+      stored.resultHash,
+    );
+    await expect(
+      db.analysis.update({
+        where: { id: stored.id },
+        data: { engineVersion: 'tampered' },
+      }),
+    ).rejects.toThrow();
+    const read = await viewer.agent
+      .get('/api' + root + '/comparisons/' + stored.id)
+      .expect(200);
+    expect(read.body.resultHash).toBe(created.body.resultHash);
+    await outsider.agent
+      .get('/api' + root + '/comparisons/' + stored.id)
+      .expect(404);
+    await owner.agent
+      .get(
+        `/api/workspaces/${owner.workspaceId}/repositories/${foreignRepositoryId}/comparisons/${stored.id}`,
+      )
+      .expect(404);
+    await mutation(
+      engineer,
+      'post',
+      `${root}/features/${feature.body.id}/mappings/${mapped.body.id}/review`,
+    )
+      .send({ action: 'REJECT', expectedVersion: 1 })
+      .expect(201);
+    const reread = await viewer.agent
+      .get('/api' + root + '/comparisons/' + stored.id)
+      .expect(200);
+    expect(reread.body.result).toEqual(created.body.result);
+    const list = await viewer.agent
+      .get('/api' + root + '/comparisons')
+      .expect(200);
+    expect(list.body.some((r: { id: string }) => r.id === stored.id)).toBe(
+      true,
+    );
+    expect(list.body[0].input).toBeUndefined();
   });
   it('requires authentication for workspace and current-user endpoints', async () => {
     await request(app.getHttpServer()).get('/api/auth/me').expect(401);
@@ -629,6 +1177,115 @@ describe('Phase 2 real PostgreSQL/Redis integration', () => {
         else process.env[key] = original[key];
       }
     }
+  });
+  it('imports immutable test artifacts with scoped access, validation and explicit mappings', async () => {
+    const evidenceOutsider = await register('evidence-outsider');
+    const scope = { workspaceId: owner.workspaceId, repositoryId };
+    const root = `/workspaces/${owner.workspaceId}/repositories/${repositoryId}/test-evidence`;
+    const content = readFileSync(
+      resolve(__dirname, '../../../fixtures/test-evidence/junit.xml'),
+      'utf8',
+    );
+    const body = {
+      format: 'JUNIT',
+      commitSha: 'a'.repeat(40),
+      runner: 'vitest',
+      recordedAt: new Date().toISOString(),
+      filename: 'junit.xml',
+      source: 'CI fixture run',
+      content,
+    };
+    await mutation(viewer, 'post', root + '/artifacts')
+      .send(body)
+      .expect(403);
+    await owner.agent
+      .post('/api' + root + '/artifacts')
+      .send(body)
+      .expect(403);
+    await mutation(engineer, 'post', root + '/artifacts')
+      .send({ ...body, content: '<!DOCTYPE testsuite><testsuite/>' })
+      .expect(400);
+    const imported = await mutation(engineer, 'post', root + '/artifacts')
+      .send(body)
+      .expect(201);
+    const artifact = imported.body;
+    expect(artifact.content).toBeUndefined();
+    expect(artifact.contentHash).toBe(
+      createHash('sha256').update(content).digest('hex'),
+    );
+    expect(artifact.parsed.tests).toHaveLength(3);
+    expect(
+      await db.testCase.count({
+        where: { ...scope, testRun: { externalRunId: artifact.id } },
+      }),
+    ).toBe(3);
+    const detail = await viewer.agent
+      .get(
+        '/api' +
+          root +
+          '/artifacts/' +
+          artifact.id +
+          '?commitSha=' +
+          'b'.repeat(40),
+      )
+      .expect(200);
+    expect(detail.body.commitMatch).toBe(false);
+    await evidenceOutsider.agent
+      .get('/api' + root + '/artifacts/' + artifact.id)
+      .expect(404);
+    await owner.agent
+      .get(
+        `/api/workspaces/${owner.workspaceId}/repositories/${foreignRepositoryId}/test-evidence/artifacts/${artifact.id}`,
+      )
+      .expect(404);
+    await expect(
+      db.testArtifact.update({
+        where: { id: artifact.id },
+        data: { source: 'changed' },
+      }),
+    ).rejects.toThrow();
+    const feature = await db.businessFeature.create({
+      data: {
+        ...scope,
+        key: 'artifact-checkout',
+        name: 'Artifact checkout',
+        criticality: 'HIGH',
+      },
+    });
+    const mapping = {
+      featureId: feature.id,
+      artifactId: artifact.id,
+      testIdentity: 'checkout-success',
+      rationale: 'Checkout acceptance scenario',
+    };
+    await mutation(engineer, 'post', root + '/mappings')
+      .send({ ...mapping, testIdentity: 'missing' })
+      .expect(400);
+    const mapped = await mutation(engineer, 'post', root + '/mappings')
+      .send(mapping)
+      .expect(201);
+    await mutation(engineer, 'post', root + '/mappings')
+      .send(mapping)
+      .expect(409);
+    await mutation(
+      viewer,
+      'delete',
+      root + '/mappings/' + mapped.body.id,
+    ).expect(403);
+    await mutation(
+      engineer,
+      'delete',
+      root + '/mappings/' + mapped.body.id,
+    ).expect(200);
+    expect(
+      await db.auditEvent.count({
+        where: {
+          ...scope,
+          targetId: artifact.id,
+          action: 'test_artifact.imported',
+        },
+      }),
+    ).toBe(1);
   });
   it('uses Redis-backed atomic limits without trusting X-Forwarded-For', async () => {
     const limiter = app.get(AuthRateLimit);

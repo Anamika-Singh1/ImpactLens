@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites><testsuite name="Checkout suite" tests="3">
+  <testcase id="checkout-success" name="Checkout succeeds" classname="Checkout" file="tests/checkout.test.ts" />
+  <testcase id="checkout-declined" name="Checkout declines invalid card" classname="Checkout" file="tests/checkout.test.ts"><failure message="Unexpected result"/></testcase>
+  <testcase id="profile-skipped" name="Profile loads" file="tests/profile.test.ts"><skipped/></testcase>
+</testsuite></testsuites>

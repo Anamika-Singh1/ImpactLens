@@ -6,3 +6,10 @@ playwright-report
 package-lock.json
 .env
 **/.env
+# Frozen benchmark source is modified by exact, reviewed scenario patches.
+fixtures/commerce/src
+fixtures/commerce/tests
+fixtures/commerce/ground-truth.json
+fixtures/commerce/package.json
+fixtures/commerce/.runs
+benchmark-results

@@ -12,9 +12,20 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: new ConsoleLogger({ json: true }),
   });
-  configureHttp(app, logger, config.WEB_ORIGIN);
+  configureHttp(app, logger, config.WEB_ORIGIN, config.TRUSTED_PROXIES);
   app.enableShutdownHooks();
-  await app.listen(config.PORT, '127.0.0.1');
+  // Bound shutdown even if an external dependency stops responding.
+  let shutdownDeadline: ReturnType<typeof setTimeout> | undefined;
+  const boundShutdown = () => {
+    shutdownDeadline ??= setTimeout(() => process.exit(1), 20000);
+    shutdownDeadline.unref();
+  };
+  process.once('SIGTERM', boundShutdown);
+  process.once('SIGINT', boundShutdown);
+  await app.listen(config.PORT, config.HOST);
+  const server = app.getHttpServer();
+  server.headersTimeout = 15000;
+  server.requestTimeout = 60000;
   logger.info({ port: config.PORT }, 'API listening');
 }
 bootstrap().catch((error) => {
@@ -28,5 +39,5 @@ bootstrap().catch((error) => {
           : 'API startup failed; verify dependencies and configuration.',
     }),
   );
-  process.exitCode = 1;
+  process.exit(1);
 });

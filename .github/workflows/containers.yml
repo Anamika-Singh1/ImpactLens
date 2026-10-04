@@ -1,0 +1,37 @@
+name: Containers and synthetic smoke
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  package-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Build all release targets locally (never push)
+        run: docker compose -f compose.demo.yaml --profile setup build
+      - run: docker compose -f compose.demo.yaml up -d --wait postgres-demo redis-demo
+      - run: docker compose -f compose.demo.yaml run --rm migrate
+      - run: docker compose -f compose.demo.yaml up -d --wait api worker web
+      - run: docker compose -f compose.demo.yaml run --rm seed
+      - run: npx playwright test --config playwright.smoke.config.ts
+      - name: Graceful restart preserves saved evidence
+        run: |
+          docker compose -f compose.demo.yaml restart api worker
+          docker compose -f compose.demo.yaml up -d --wait api worker web
+          npx playwright test --config playwright.smoke.config.ts
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          {
+            name: synthetic-smoke-traces,
+            path: test-results/,
+            retention-days: 7,
+          }
+      - name: Delete only this job's disposable synthetic volumes
+        if: always()
+        run: docker compose -f compose.demo.yaml down --volumes --remove-orphans

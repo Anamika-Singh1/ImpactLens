@@ -1,11 +1,28 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { apiRequest, useAuth } from './session';
+import { AiWorkspaceSettings } from './Explanations';
+import { RepositoryAccess } from './RepositoryAccess';
+import { useSearchParams } from 'react-router-dom';
 type Member = {
   role: string;
   user: { id: string; email: string; name: string };
 };
 export function WorkspaceSettings() {
-  const { workspace, refresh } = useAuth();
+  const { workspace, refresh, current, selectWorkspace } = useAuth();
+  const [query, setQuery] = useSearchParams();
+  const callbackWorkspace = query.get('workspaceId');
+  useEffect(() => {
+    if (
+      query.get('github') === 'connected' &&
+      callbackWorkspace &&
+      current?.workspaces.some((item) => item.id === callbackWorkspace)
+    ) {
+      selectWorkspace(callbackWorkspace);
+      const next = new URLSearchParams(query);
+      next.delete('workspaceId');
+      setQuery(next, { replace: true });
+    }
+  }, [callbackWorkspace, current, query]);
   const [members, setMembers] = useState<Member[]>([]);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -180,13 +197,8 @@ export function WorkspaceSettings() {
           </form>
         )}
       </section>
-      <section className="panel">
-        <h2>Integrations</h2>
-        <p className="muted">
-          GitHub authorization is planned for a later phase. Integration
-          management is reserved for workspace Owners.
-        </p>
-      </section>
+      <RepositoryAccess key={workspace.id} />
+      <AiWorkspaceSettings key={workspace.id} />
     </>
   );
 }

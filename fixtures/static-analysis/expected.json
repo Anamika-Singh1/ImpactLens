@@ -1,0 +1,12 @@
+[
+  ["src/barrel.ts", "REEXPORT", "src/core/math.ts"],
+  ["src/barrel.ts", "REEXPORT", "src/cycle/a.ts"],
+  ["src/main.ts", "IMPORT", "src/core/math.ts"],
+  ["src/main.ts", "IMPORT", "src/barrel.ts"],
+  ["src/main.ts", "IMPORT", "src/deleted.ts"],
+  ["src/main.ts", "DYNAMIC_IMPORT", "src/core/math.ts"],
+  ["src/cycle/a.ts", "IMPORT", "src/cycle/b.ts"],
+  ["src/cycle/b.ts", "IMPORT", "src/cycle/a.ts"],
+  ["src/server.ts", "IMPORT", "src/handler.ts"],
+  ["src/View.tsx", "IMPORT", "src/core/math.ts"]
+]

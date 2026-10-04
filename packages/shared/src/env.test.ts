@@ -1,6 +1,31 @@
 import { describe, expect, it } from 'vitest';
 import { apiEnvSchema, workerEnvSchema, parseEnv } from './env';
 describe('environment validation', () => {
+  it('rejects blanket or malformed proxy trust and accepts explicit private subnets', () => {
+    const values = {
+      DATABASE_URL: 'postgresql://localhost/db',
+      REDIS_URL: 'redis://localhost:6379',
+      WEB_ORIGIN: 'https://example.test',
+      NODE_ENV: 'production',
+    };
+    for (const TRUSTED_PROXIES of [
+      'true',
+      '1',
+      '0.0.0.0/0',
+      '999.1.1.1',
+      '10.0.0.1/33',
+    ])
+      expect(() =>
+        parseEnv(apiEnvSchema, { ...values, TRUSTED_PROXIES }),
+      ).toThrow('TRUSTED_PROXIES');
+    expect(
+      parseEnv(apiEnvSchema, {
+        ...values,
+        HOST: '0.0.0.0',
+        TRUSTED_PROXIES: '172.20.0.0/24,127.0.0.1',
+      }).TRUSTED_PROXIES,
+    ).toBe('172.20.0.0/24,127.0.0.1');
+  });
   it('requires an HTTPS origin in production and bounds session lifetime', () => {
     const values = {
       DATABASE_URL: 'postgresql://localhost/db',

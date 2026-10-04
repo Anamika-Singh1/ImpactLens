@@ -6,7 +6,10 @@ import { useAuth } from './session';
 import { AuthScreen } from './AuthScreen';
 import { WorkspaceSettings } from './WorkspaceSettings';
 import { Repositories } from './Repositories';
-import { CoreRecords } from './CoreRecords';
+import { RepositoryDetails } from './RepositoryDetails';
+import { Comparisons, ComparisonDetail } from './Comparisons';
+import { FeatureCatalog, FeatureDetailPage } from './Features';
+import { TestEvidence } from './TestEvidence';
 const pages = [
   {
     path: '/repositories',
@@ -14,7 +17,7 @@ const pages = [
     symbol: '⌘',
     empty: 'No repositories connected',
     detail:
-      'Repository import will be available in a later phase. Only authorized repositories will be analyzed.',
+      'Explore imported source snapshots, static dependencies, and analysis limitations.',
   },
   {
     path: '/features',
@@ -30,7 +33,7 @@ const pages = [
     symbol: '◎',
     empty: 'No analyses available',
     detail:
-      'Commit and pull request comparisons will appear here when analysis is implemented.',
+      'Compare imported commit snapshots and review potential feature impact with source evidence.',
   },
   {
     path: '/test-evidence',
@@ -38,7 +41,7 @@ const pages = [
     symbol: '☑',
     empty: 'No test evidence imported',
     detail:
-      'No test results or coverage have been imported. This does not mean that no tests exist.',
+      'Import CI test results and coverage, inspect provenance, and map individual tests to features.',
   },
 ];
 type State =
@@ -120,18 +123,6 @@ function Health() {
         </div>
       )}
     </section>
-  );
-}
-function Empty({ title, detail }: { title: string; detail: string }) {
-  return (
-    <div className="empty panel">
-      <div className="empty-icon" aria-hidden="true">
-        ◇
-      </div>
-      <h2>{title}</h2>
-      <p>{detail}</p>
-      <span className="tag">Planned capability</span>
-    </div>
   );
 }
 function Overview() {
@@ -238,28 +229,21 @@ export function App() {
           <Routes key={workspace?.id}>
             <Route path="/" element={<Overview />} />
             <Route path="/repositories" element={<Repositories />} />
-            <Route path="/features" element={<CoreRecords kind="features" />} />
-            <Route path="/analyses" element={<CoreRecords kind="analyses" />} />
-            {pages
-              .filter((page) => page.path === '/test-evidence')
-              .map((page) => (
-                <Route
-                  key={page.path}
-                  path={page.path}
-                  element={
-                    <>
-                      <p className="eyebrow">
-                        WORKSPACE / {page.title.toUpperCase()}
-                      </p>
-                      <h1>{page.title}</h1>
-                      <p className="subtitle">
-                        Build a review grounded in repository evidence.
-                      </p>
-                      <Empty title={page.empty} detail={page.detail} />
-                    </>
-                  }
-                />
-              ))}
+            <Route
+              path="/repositories/:repositoryId"
+              element={<RepositoryDetails key={workspace?.id} />}
+            />
+            <Route path="/features" element={<FeatureCatalog />} />
+            <Route
+              path="/features/:repositoryId/:featureId"
+              element={<FeatureDetailPage />}
+            />
+            <Route path="/analyses" element={<Comparisons />} />
+            <Route
+              path="/analyses/:repositoryId/:analysisId"
+              element={<ComparisonDetail />}
+            />
+            <Route path="/test-evidence" element={<TestEvidence />} />
             <Route path="/settings" element={<WorkspaceSettings />} />
             <Route
               path="*"

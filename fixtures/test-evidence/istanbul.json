@@ -1,0 +1,20 @@
+{
+  "src/checkout.ts": {
+    "path": "src/checkout.ts",
+    "statementMap": {
+      "0": {
+        "start": { "line": 2, "column": 2 },
+        "end": { "line": 2, "column": 20 }
+      },
+      "1": {
+        "start": { "line": 3, "column": 2 },
+        "end": { "line": 3, "column": 20 }
+      }
+    },
+    "s": { "0": 1, "1": 0 },
+    "fnMap": {},
+    "f": {},
+    "branchMap": {},
+    "b": {}
+  }
+}

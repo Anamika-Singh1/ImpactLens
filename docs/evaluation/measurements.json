@@ -1,0 +1,2282 @@
+{
+  "version": 1,
+  "measuredAt": "2026-10-01T11:44:07.799Z",
+  "manifestSha256": "4011955c4d6b7603e0dd8ad5460e503a52f3e2c07f30497d20e2f557253b5ba2",
+  "baselineSha": "008b60c44e5f8996d69dcccffaebb5eff4727cec",
+  "repeats": 5,
+  "warmupsPerScenario": 1,
+  "engineVersion": "7.0.0",
+  "hardware": {
+    "cpu": "Intel(R) Core(TM) i5-8265U CPU @ 1.60GHz",
+    "logicalCpus": 8,
+    "totalMemoryGiB": 7.883594512939453,
+    "platform": "win32",
+    "release": "10.0.26200",
+    "arch": "x64",
+    "node": "v24.11.1"
+  },
+  "dataset": {
+    "features": 5,
+    "scenarios": 10,
+    "baselineFiles": 22,
+    "baselineTestCases": 8,
+    "fullSuiteFiles": 5,
+    "baselineSourceBytes": 6562
+  },
+  "selectionPolicy": "Confirmed feature-to-test-file catalog; unknowns except five explicitly allow-listed external modules or broaderReview trigger full fixture suite.",
+  "aggregates": [
+    {
+      "split": "development",
+      "scenarios": 6,
+      "tp": 7,
+      "fp": 0,
+      "fn": 1,
+      "precision": 1,
+      "recall": 0.875,
+      "fallbackScenarios": 3,
+      "deliberateFaultScenarios": 1,
+      "detectedFaultScenarios": 1
+    },
+    {
+      "split": "held-out",
+      "scenarios": 4,
+      "tp": 8,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "fallbackScenarios": 1,
+      "deliberateFaultScenarios": 4,
+      "detectedFaultScenarios": 4
+    },
+    {
+      "split": "all",
+      "scenarios": 10,
+      "tp": 15,
+      "fp": 0,
+      "fn": 1,
+      "precision": 1,
+      "recall": 0.9375,
+      "fallbackScenarios": 4,
+      "deliberateFaultScenarios": 5,
+      "detectedFaultScenarios": 5
+    }
+  ],
+  "results": [
+    {
+      "id": "shared-auth",
+      "split": "development",
+      "reason": "All four protected user journeys use authentication middleware; catalog is public.",
+      "baseSha": "008b60c44e5f8996d69dcccffaebb5eff4727cec",
+      "headSha": "fc3558811e686e96d803026fba7bc2b58463f3c7",
+      "baseFiles": 22,
+      "headFiles": 22,
+      "sourceBytes": 6583,
+      "expected": ["authentication", "cart", "checkout", "orders"],
+      "predicted": ["authentication", "cart", "checkout", "orders"],
+      "truePositives": ["authentication", "cart", "checkout", "orders"],
+      "falsePositives": [],
+      "missedImpacts": [],
+      "precision": 1,
+      "recall": 1,
+      "knownFailures": [],
+      "analysisMs": {
+        "min": 137.10320000000002,
+        "median": 143.09120000000001,
+        "max": 195.08780000000002,
+        "mean": 152.47314
+      },
+      "analysisWallMs": {
+        "min": 449.84670000000006,
+        "median": 496.627199999999,
+        "max": 617.0771000000022,
+        "mean": 515.9003200000003
+      },
+      "peakRssMiB": {
+        "min": 77.7421875,
+        "median": 77.87890625,
+        "max": 78.0703125,
+        "mean": 77.89140625
+      },
+      "selectedSuiteMs": {
+        "min": 1600.4207999999999,
+        "median": 1749.1427000000003,
+        "max": 1859.815300000002,
+        "mean": 1723.7880000000005
+      },
+      "fullSuiteMs": {
+        "min": 1972.3785000000025,
+        "median": 2004.271899999996,
+        "max": 2787.3975999999966,
+        "mean": 2191.027539999999
+      },
+      "fallback": false,
+      "fallbackReasons": [],
+      "samples": [
+        {
+          "iteration": 1,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["authentication", "cart", "checkout", "orders"],
+            "durationMs": 137.10320000000002,
+            "peakRssKiB": 79808,
+            "resultHash": "4124769aad9925084c6fa4d0bfcc6b965fcf4671cd958acc8b8b528bebea066b",
+            "fallback": false,
+            "fallbackReasons": [],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 449.84670000000006
+          },
+          "selectedTests": [
+            "tests/authentication.test.js",
+            "tests/cart.test.js",
+            "tests/checkout.test.js",
+            "tests/orders.test.js"
+          ],
+          "selected": {
+            "wallMs": 1646.3181000000004,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 7
+          },
+          "full": {
+            "wallMs": 1982.0532999999996,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": []
+        },
+        {
+          "iteration": 2,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["authentication", "cart", "checkout", "orders"],
+            "durationMs": 142.17059999999998,
+            "peakRssKiB": 79748,
+            "resultHash": "4124769aad9925084c6fa4d0bfcc6b965fcf4671cd958acc8b8b528bebea066b",
+            "fallback": false,
+            "fallbackReasons": [],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 486.27590000000055
+          },
+          "selectedTests": [
+            "tests/authentication.test.js",
+            "tests/cart.test.js",
+            "tests/checkout.test.js",
+            "tests/orders.test.js"
+          ],
+          "selected": {
+            "wallMs": 1859.815300000002,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 7
+          },
+          "full": {
+            "wallMs": 2787.3975999999966,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": []
+        },
+        {
+          "iteration": 3,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["authentication", "cart", "checkout", "orders"],
+            "durationMs": 144.91290000000004,
+            "peakRssKiB": 79608,
+            "resultHash": "4124769aad9925084c6fa4d0bfcc6b965fcf4671cd958acc8b8b528bebea066b",
+            "fallback": false,
+            "fallbackReasons": [],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 496.627199999999
+          },
+          "selectedTests": [
+            "tests/authentication.test.js",
+            "tests/cart.test.js",
+            "tests/checkout.test.js",
+            "tests/orders.test.js"
+          ],
+          "selected": {
+            "wallMs": 1749.1427000000003,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 7
+          },
+          "full": {
+            "wallMs": 2209.036400000001,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": []
+        },
+        {
+          "iteration": 4,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["authentication", "cart", "checkout", "orders"],
+            "durationMs": 143.09120000000001,
+            "peakRssKiB": 79696,
+            "resultHash": "4124769aad9925084c6fa4d0bfcc6b965fcf4671cd958acc8b8b528bebea066b",
+            "fallback": false,
+            "fallbackReasons": [],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 617.0771000000022
+          },
+          "selectedTests": [
+            "tests/authentication.test.js",
+            "tests/cart.test.js",
+            "tests/checkout.test.js",
+            "tests/orders.test.js"
+          ],
+          "selected": {
+            "wallMs": 1600.4207999999999,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 7
+          },
+          "full": {
+            "wallMs": 1972.3785000000025,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": []
+        },
+        {
+          "iteration": 5,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["authentication", "cart", "checkout", "orders"],
+            "durationMs": 195.08780000000002,
+            "peakRssKiB": 79944,
+            "resultHash": "4124769aad9925084c6fa4d0bfcc6b965fcf4671cd958acc8b8b528bebea066b",
+            "fallback": false,
+            "fallbackReasons": [],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 529.6746999999996
+          },
+          "selectedTests": [
+            "tests/authentication.test.js",
+            "tests/cart.test.js",
+            "tests/checkout.test.js",
+            "tests/orders.test.js"
+          ],
+          "selected": {
+            "wallMs": 1763.2430999999997,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 7
+          },
+          "full": {
+            "wallMs": 2004.271899999996,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": []
+        }
+      ],
+      "serializedSnapshotBytes": 7217,
+      "baseSourceBytes": 6562
+    },
+    {
+      "id": "checkout-only",
+      "split": "development",
+      "reason": "Only checkout's response contract gains a receipt flag.",
+      "baseSha": "008b60c44e5f8996d69dcccffaebb5eff4727cec",
+      "headSha": "b523564de0bb325da3144d36d1d38ac804549bd2",
+      "baseFiles": 22,
+      "headFiles": 22,
+      "sourceBytes": 6577,
+      "expected": ["checkout"],
+      "predicted": ["checkout"],
+      "truePositives": ["checkout"],
+      "falsePositives": [],
+      "missedImpacts": [],
+      "precision": 1,
+      "recall": 1,
+      "knownFailures": [],
+      "analysisMs": {
+        "min": 139.66159999999996,
+        "median": 165.128,
+        "max": 182.98229999999995,
+        "mean": 160.13181999999998
+      },
+      "analysisWallMs": {
+        "min": 476.056399999994,
+        "median": 512.3936000000031,
+        "max": 576.6477000000014,
+        "mean": 519.7165999999997
+      },
+      "peakRssMiB": {
+        "min": 77.765625,
+        "median": 77.89453125,
+        "max": 77.90234375,
+        "mean": 77.85390625
+      },
+      "selectedSuiteMs": {
+        "min": 492.0376000000033,
+        "median": 598.6952999999994,
+        "max": 618.8543000000063,
+        "mean": 564.2262400000021
+      },
+      "fullSuiteMs": {
+        "min": 2088.9145999999964,
+        "median": 2206.640299999999,
+        "max": 2610.247500000005,
+        "mean": 2328.7317399999984
+      },
+      "fallback": false,
+      "fallbackReasons": [],
+      "samples": [
+        {
+          "iteration": 1,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["checkout"],
+            "durationMs": 182.98229999999995,
+            "peakRssKiB": 79772,
+            "resultHash": "51b9ef3534529e20ed016e4662dc93f3e3b3215952f0e67451c78efce464d15c",
+            "fallback": false,
+            "fallbackReasons": [],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 576.6477000000014
+          },
+          "selectedTests": ["tests/checkout.test.js"],
+          "selected": {
+            "wallMs": 618.8543000000063,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 2
+          },
+          "full": {
+            "wallMs": 2610.247500000005,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": []
+        },
+        {
+          "iteration": 2,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["checkout"],
+            "durationMs": 165.128,
+            "peakRssKiB": 79676,
+            "resultHash": "51b9ef3534529e20ed016e4662dc93f3e3b3215952f0e67451c78efce464d15c",
+            "fallback": false,
+            "fallbackReasons": [],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 512.3936000000031
+          },
+          "selectedTests": ["tests/checkout.test.js"],
+          "selected": {
+            "wallMs": 599.501400000001,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 2
+          },
+          "full": {
+            "wallMs": 2546.1182999999946,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": []
+        },
+        {
+          "iteration": 3,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["checkout"],
+            "durationMs": 139.66159999999996,
+            "peakRssKiB": 79768,
+            "resultHash": "51b9ef3534529e20ed016e4662dc93f3e3b3215952f0e67451c78efce464d15c",
+            "fallback": false,
+            "fallbackReasons": [],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 476.056399999994
+          },
+          "selectedTests": ["tests/checkout.test.js"],
+          "selected": {
+            "wallMs": 512.0426000000007,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 2
+          },
+          "full": {
+            "wallMs": 2206.640299999999,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": []
+        },
+        {
+          "iteration": 4,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["checkout"],
+            "durationMs": 145.3392,
+            "peakRssKiB": 79632,
+            "resultHash": "51b9ef3534529e20ed016e4662dc93f3e3b3215952f0e67451c78efce464d15c",
+            "fallback": false,
+            "fallbackReasons": [],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 484.5106999999989
+          },
+          "selectedTests": ["tests/checkout.test.js"],
+          "selected": {
+            "wallMs": 598.6952999999994,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 2
+          },
+          "full": {
+            "wallMs": 2088.9145999999964,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": []
+        },
+        {
+          "iteration": 5,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["checkout"],
+            "durationMs": 167.548,
+            "peakRssKiB": 79764,
+            "resultHash": "51b9ef3534529e20ed016e4662dc93f3e3b3215952f0e67451c78efce464d15c",
+            "fallback": false,
+            "fallbackReasons": [],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 548.9746000000014
+          },
+          "selectedTests": ["tests/checkout.test.js"],
+          "selected": {
+            "wallMs": 492.0376000000033,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 2
+          },
+          "full": {
+            "wallMs": 2191.7379999999976,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": []
+        }
+      ],
+      "serializedSnapshotBytes": 7211,
+      "baseSourceBytes": 6562
+    },
+    {
+      "id": "unrelated-component",
+      "split": "development",
+      "reason": "Badge is not rendered or imported by any of the five business journeys.",
+      "baseSha": "008b60c44e5f8996d69dcccffaebb5eff4727cec",
+      "headSha": "2bdb69432a407bdcf9b72436c91a0c38ffdd7fd1",
+      "baseFiles": 22,
+      "headFiles": 22,
+      "sourceBytes": 6559,
+      "expected": [],
+      "predicted": [],
+      "truePositives": [],
+      "falsePositives": [],
+      "missedImpacts": [],
+      "precision": null,
+      "recall": null,
+      "knownFailures": [],
+      "analysisMs": {
+        "min": 133.74349999999998,
+        "median": 140.95700000000005,
+        "max": 152.2688,
+        "mean": 142.79244000000003
+      },
+      "analysisWallMs": {
+        "min": 449.44490000000224,
+        "median": 472.1559999999881,
+        "max": 509.14820000001055,
+        "mean": 477.2549199999994
+      },
+      "peakRssMiB": {
+        "min": 77.62109375,
+        "median": 77.74609375,
+        "max": 79.8515625,
+        "mean": 78.15234375
+      },
+      "selectedSuiteMs": {
+        "min": 1898.2677999999942,
+        "median": 2058.79310000001,
+        "max": 2326.622100000008,
+        "mean": 2070.9980600000026
+      },
+      "fullSuiteMs": {
+        "min": 1901.6020999999964,
+        "median": 1950.8656999999948,
+        "max": 4361.856599999999,
+        "mean": 2455.4115799999986
+      },
+      "fallback": true,
+      "fallbackReasons": ["UNMAPPED_CHANGE"],
+      "samples": [
+        {
+          "iteration": 1,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": [],
+            "durationMs": 135.50990000000002,
+            "peakRssKiB": 81768,
+            "resultHash": "bc038905b768c56a77389febb08c48dbecc69356910f0022517401b29556f260",
+            "fallback": true,
+            "fallbackReasons": ["UNMAPPED_CHANGE"],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 449.44490000000224
+          },
+          "selectedTests": [
+            "tests/authentication.test.js",
+            "tests/cart.test.js",
+            "tests/catalog.test.js",
+            "tests/checkout.test.js",
+            "tests/orders.test.js"
+          ],
+          "selected": {
+            "wallMs": 1898.2677999999942,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "full": {
+            "wallMs": 1901.6020999999964,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": []
+        },
+        {
+          "iteration": 2,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": [],
+            "durationMs": 151.483,
+            "peakRssKiB": 79744,
+            "resultHash": "bc038905b768c56a77389febb08c48dbecc69356910f0022517401b29556f260",
+            "fallback": true,
+            "fallbackReasons": ["UNMAPPED_CHANGE"],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 466.8611000000019
+          },
+          "selectedTests": [
+            "tests/authentication.test.js",
+            "tests/cart.test.js",
+            "tests/catalog.test.js",
+            "tests/checkout.test.js",
+            "tests/orders.test.js"
+          ],
+          "selected": {
+            "wallMs": 2326.622100000008,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "full": {
+            "wallMs": 4361.856599999999,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": []
+        },
+        {
+          "iteration": 3,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": [],
+            "durationMs": 152.2688,
+            "peakRssKiB": 79612,
+            "resultHash": "bc038905b768c56a77389febb08c48dbecc69356910f0022517401b29556f260",
+            "fallback": true,
+            "fallbackReasons": ["UNMAPPED_CHANGE"],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 488.6643999999942
+          },
+          "selectedTests": [
+            "tests/authentication.test.js",
+            "tests/cart.test.js",
+            "tests/catalog.test.js",
+            "tests/checkout.test.js",
+            "tests/orders.test.js"
+          ],
+          "selected": {
+            "wallMs": 2129.6938999999984,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "full": {
+            "wallMs": 2146.1898999999976,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": []
+        },
+        {
+          "iteration": 4,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": [],
+            "durationMs": 140.95700000000005,
+            "peakRssKiB": 79484,
+            "resultHash": "bc038905b768c56a77389febb08c48dbecc69356910f0022517401b29556f260",
+            "fallback": true,
+            "fallbackReasons": ["UNMAPPED_CHANGE"],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 509.14820000001055
+          },
+          "selectedTests": [
+            "tests/authentication.test.js",
+            "tests/cart.test.js",
+            "tests/catalog.test.js",
+            "tests/checkout.test.js",
+            "tests/orders.test.js"
+          ],
+          "selected": {
+            "wallMs": 2058.79310000001,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "full": {
+            "wallMs": 1916.5436000000045,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": []
+        },
+        {
+          "iteration": 5,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": [],
+            "durationMs": 133.74349999999998,
+            "peakRssKiB": 79532,
+            "resultHash": "bc038905b768c56a77389febb08c48dbecc69356910f0022517401b29556f260",
+            "fallback": true,
+            "fallbackReasons": ["UNMAPPED_CHANGE"],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 472.1559999999881
+          },
+          "selectedTests": [
+            "tests/authentication.test.js",
+            "tests/cart.test.js",
+            "tests/catalog.test.js",
+            "tests/checkout.test.js",
+            "tests/orders.test.js"
+          ],
+          "selected": {
+            "wallMs": 1941.613400000002,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "full": {
+            "wallMs": 1950.8656999999948,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": []
+        }
+      ],
+      "serializedSnapshotBytes": 7193,
+      "baseSourceBytes": 6562
+    },
+    {
+      "id": "rename-cart",
+      "split": "development",
+      "reason": "Moving the cart implementation and its import affects only the cart module boundary.",
+      "baseSha": "008b60c44e5f8996d69dcccffaebb5eff4727cec",
+      "headSha": "02d45120e5448f67e8ebe99282ea77d220150915",
+      "baseFiles": 22,
+      "headFiles": 22,
+      "sourceBytes": 6568,
+      "expected": ["cart"],
+      "predicted": ["cart"],
+      "truePositives": ["cart"],
+      "falsePositives": [],
+      "missedImpacts": [],
+      "precision": 1,
+      "recall": 1,
+      "knownFailures": [],
+      "analysisMs": {
+        "min": 134.05699999999996,
+        "median": 137.8526,
+        "max": 151.98609999999996,
+        "mean": 142.33148
+      },
+      "analysisWallMs": {
+        "min": 450.2189999999973,
+        "median": 513.1157000000094,
+        "max": 621.1059999999998,
+        "mean": 517.9712399999989
+      },
+      "peakRssMiB": {
+        "min": 77.7109375,
+        "median": 77.9453125,
+        "max": 78.10546875,
+        "mean": 77.9328125
+      },
+      "selectedSuiteMs": {
+        "min": 2038.9484000000084,
+        "median": 2095.2706999999937,
+        "max": 2248.1448999999993,
+        "mean": 2115.0736999999995
+      },
+      "fullSuiteMs": {
+        "min": 1993.5521000000008,
+        "median": 2054.4827000000078,
+        "max": 2396.8313999999955,
+        "mean": 2125.822159999999
+      },
+      "fallback": true,
+      "fallbackReasons": ["UNMAPPED_CHANGE"],
+      "samples": [
+        {
+          "iteration": 1,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["cart"],
+            "durationMs": 151.98609999999996,
+            "peakRssKiB": 79816,
+            "resultHash": "baf18abed4a8d6384fb1d26c2849cc7e41f80478325ba37e340e4e52f5dab4b7",
+            "fallback": true,
+            "fallbackReasons": ["UNMAPPED_CHANGE"],
+            "changes": 2,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 513.1157000000094
+          },
+          "selectedTests": [
+            "tests/authentication.test.js",
+            "tests/cart.test.js",
+            "tests/catalog.test.js",
+            "tests/checkout.test.js",
+            "tests/orders.test.js"
+          ],
+          "selected": {
+            "wallMs": 2067.116299999994,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "full": {
+            "wallMs": 2140.0239999999903,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": []
+        },
+        {
+          "iteration": 2,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["cart"],
+            "durationMs": 134.05699999999996,
+            "peakRssKiB": 79576,
+            "resultHash": "baf18abed4a8d6384fb1d26c2849cc7e41f80478325ba37e340e4e52f5dab4b7",
+            "fallback": true,
+            "fallbackReasons": ["UNMAPPED_CHANGE"],
+            "changes": 2,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 543.2432999999874
+          },
+          "selectedTests": [
+            "tests/authentication.test.js",
+            "tests/cart.test.js",
+            "tests/catalog.test.js",
+            "tests/checkout.test.js",
+            "tests/orders.test.js"
+          ],
+          "selected": {
+            "wallMs": 2125.8882000000012,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "full": {
+            "wallMs": 1993.5521000000008,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": []
+        },
+        {
+          "iteration": 3,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["cart"],
+            "durationMs": 136.22220000000002,
+            "peakRssKiB": 79980,
+            "resultHash": "baf18abed4a8d6384fb1d26c2849cc7e41f80478325ba37e340e4e52f5dab4b7",
+            "fallback": true,
+            "fallbackReasons": ["UNMAPPED_CHANGE"],
+            "changes": 2,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 450.2189999999973
+          },
+          "selectedTests": [
+            "tests/authentication.test.js",
+            "tests/cart.test.js",
+            "tests/catalog.test.js",
+            "tests/checkout.test.js",
+            "tests/orders.test.js"
+          ],
+          "selected": {
+            "wallMs": 2095.2706999999937,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "full": {
+            "wallMs": 2044.2206000000006,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": []
+        },
+        {
+          "iteration": 4,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["cart"],
+            "durationMs": 137.8526,
+            "peakRssKiB": 79912,
+            "resultHash": "baf18abed4a8d6384fb1d26c2849cc7e41f80478325ba37e340e4e52f5dab4b7",
+            "fallback": true,
+            "fallbackReasons": ["UNMAPPED_CHANGE"],
+            "changes": 2,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 462.1722000000009
+          },
+          "selectedTests": [
+            "tests/authentication.test.js",
+            "tests/cart.test.js",
+            "tests/catalog.test.js",
+            "tests/checkout.test.js",
+            "tests/orders.test.js"
+          ],
+          "selected": {
+            "wallMs": 2038.9484000000084,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "full": {
+            "wallMs": 2054.4827000000078,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": []
+        },
+        {
+          "iteration": 5,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["cart"],
+            "durationMs": 151.53949999999998,
+            "peakRssKiB": 79732,
+            "resultHash": "baf18abed4a8d6384fb1d26c2849cc7e41f80478325ba37e340e4e52f5dab4b7",
+            "fallback": true,
+            "fallbackReasons": ["UNMAPPED_CHANGE"],
+            "changes": 2,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 621.1059999999998
+          },
+          "selectedTests": [
+            "tests/authentication.test.js",
+            "tests/cart.test.js",
+            "tests/catalog.test.js",
+            "tests/checkout.test.js",
+            "tests/orders.test.js"
+          ],
+          "selected": {
+            "wallMs": 2248.1448999999993,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "full": {
+            "wallMs": 2396.8313999999955,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": []
+        }
+      ],
+      "serializedSnapshotBytes": 7208,
+      "baseSourceBytes": 6562
+    },
+    {
+      "id": "pricing-cycle",
+      "split": "development",
+      "reason": "A cycle in checkout pricing and rounding does not enter other journeys.",
+      "baseSha": "008b60c44e5f8996d69dcccffaebb5eff4727cec",
+      "headSha": "ae06f3bf64eec3be746fa3ea41bf07b20cd6c628",
+      "baseFiles": 22,
+      "headFiles": 23,
+      "sourceBytes": 6764,
+      "expected": ["checkout"],
+      "predicted": ["checkout"],
+      "truePositives": ["checkout"],
+      "falsePositives": [],
+      "missedImpacts": [],
+      "precision": 1,
+      "recall": 1,
+      "knownFailures": [],
+      "analysisMs": {
+        "min": 142.60340000000002,
+        "median": 162.75170000000003,
+        "max": 176.30490000000003,
+        "mean": 161.71442000000002
+      },
+      "analysisWallMs": {
+        "min": 476.8853999999992,
+        "median": 550.9265000000014,
+        "max": 587.2860999999975,
+        "mean": 540.7854399999982
+      },
+      "peakRssMiB": {
+        "min": 77.73046875,
+        "median": 77.890625,
+        "max": 78.01171875,
+        "mean": 77.903125
+      },
+      "selectedSuiteMs": {
+        "min": 522.7569000000076,
+        "median": 565.7965999999869,
+        "max": 660.7456000000093,
+        "mean": 581.0179800000012
+      },
+      "fullSuiteMs": {
+        "min": 1941.5959999999905,
+        "median": 2225.0197999999946,
+        "max": 2608.572599999985,
+        "mean": 2219.7162399999943
+      },
+      "fallback": false,
+      "fallbackReasons": [],
+      "samples": [
+        {
+          "iteration": 1,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["checkout"],
+            "durationMs": 142.60340000000002,
+            "peakRssKiB": 79760,
+            "resultHash": "14571bda0151124d84d53927c2149b9b893702e336978afbfebb9941fd316fe2",
+            "fallback": false,
+            "fallbackReasons": [],
+            "changes": 2,
+            "baseNodes": 45,
+            "headNodes": 48,
+            "wallMs": 476.8853999999992
+          },
+          "selectedTests": ["tests/checkout.test.js"],
+          "selected": {
+            "wallMs": 660.7456000000093,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 2
+          },
+          "full": {
+            "wallMs": 2023.4418000000005,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": []
+        },
+        {
+          "iteration": 2,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["checkout"],
+            "durationMs": 167.755,
+            "peakRssKiB": 79744,
+            "resultHash": "14571bda0151124d84d53927c2149b9b893702e336978afbfebb9941fd316fe2",
+            "fallback": false,
+            "fallbackReasons": [],
+            "changes": 2,
+            "baseNodes": 45,
+            "headNodes": 48,
+            "wallMs": 554.5004999999946
+          },
+          "selectedTests": ["tests/checkout.test.js"],
+          "selected": {
+            "wallMs": 555.7391999999963,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 2
+          },
+          "full": {
+            "wallMs": 2225.0197999999946,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": []
+        },
+        {
+          "iteration": 3,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["checkout"],
+            "durationMs": 176.30490000000003,
+            "peakRssKiB": 79880,
+            "resultHash": "14571bda0151124d84d53927c2149b9b893702e336978afbfebb9941fd316fe2",
+            "fallback": false,
+            "fallbackReasons": [],
+            "changes": 2,
+            "baseNodes": 45,
+            "headNodes": 48,
+            "wallMs": 587.2860999999975
+          },
+          "selectedTests": ["tests/checkout.test.js"],
+          "selected": {
+            "wallMs": 565.7965999999869,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 2
+          },
+          "full": {
+            "wallMs": 2299.951000000001,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": []
+        },
+        {
+          "iteration": 4,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["checkout"],
+            "durationMs": 159.1571,
+            "peakRssKiB": 79884,
+            "resultHash": "14571bda0151124d84d53927c2149b9b893702e336978afbfebb9941fd316fe2",
+            "fallback": false,
+            "fallbackReasons": [],
+            "changes": 2,
+            "baseNodes": 45,
+            "headNodes": 48,
+            "wallMs": 550.9265000000014
+          },
+          "selectedTests": ["tests/checkout.test.js"],
+          "selected": {
+            "wallMs": 522.7569000000076,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 2
+          },
+          "full": {
+            "wallMs": 1941.5959999999905,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": []
+        },
+        {
+          "iteration": 5,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["checkout"],
+            "durationMs": 162.75170000000003,
+            "peakRssKiB": 79596,
+            "resultHash": "14571bda0151124d84d53927c2149b9b893702e336978afbfebb9941fd316fe2",
+            "fallback": false,
+            "fallbackReasons": [],
+            "changes": 2,
+            "baseNodes": 45,
+            "headNodes": 48,
+            "wallMs": 534.3286999999982
+          },
+          "selectedTests": ["tests/checkout.test.js"],
+          "selected": {
+            "wallMs": 600.0516000000061,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 2
+          },
+          "full": {
+            "wallMs": 2608.572599999985,
+            "failedNames": [],
+            "code": 0,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": []
+        }
+      ],
+      "serializedSnapshotBytes": 7423,
+      "baseSourceBytes": 6562
+    },
+    {
+      "id": "dynamic-discount",
+      "split": "development",
+      "reason": "Checkout loads discount by a computed dynamic import. Changing the plugin changes its runtime total despite no literal dependency edge.",
+      "baseSha": "7583243cf786b8622591644bd57a9735b0f707e9",
+      "headSha": "797743b4652e48484570e607a4ca67e4bdb6c925",
+      "baseFiles": 22,
+      "headFiles": 22,
+      "sourceBytes": 6621,
+      "expected": ["checkout"],
+      "predicted": [],
+      "truePositives": [],
+      "falsePositives": [],
+      "missedImpacts": ["checkout"],
+      "precision": null,
+      "recall": 0,
+      "knownFailures": ["known-checkout-total"],
+      "analysisMs": {
+        "min": 141.5586,
+        "median": 169.3508,
+        "max": 461.3813000000001,
+        "mean": 223.51248
+      },
+      "analysisWallMs": {
+        "min": 471.2253999999957,
+        "median": 561.4941999999864,
+        "max": 1411.9698999999964,
+        "mean": 718.4200199999963
+      },
+      "peakRssMiB": {
+        "min": 77.69140625,
+        "median": 77.76171875,
+        "max": 78.171875,
+        "mean": 77.8703125
+      },
+      "selectedSuiteMs": {
+        "min": 1947.1491000000096,
+        "median": 2632.688599999994,
+        "max": 3328.0916000000143,
+        "mean": 2578.032420000003
+      },
+      "fullSuiteMs": {
+        "min": 2304.7337000000116,
+        "median": 2715.3225000000093,
+        "max": 4268.918700000009,
+        "mean": 3153.4932800000124
+      },
+      "fallback": true,
+      "fallbackReasons": ["UNKNOWN_DEPENDENCY", "UNMAPPED_CHANGE"],
+      "samples": [
+        {
+          "iteration": 1,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": [],
+            "durationMs": 166.6782,
+            "peakRssKiB": 79556,
+            "resultHash": "8df6555a2d07ea5b1794b53f3a6730cee58dbf065a7dc1e1b857b74225a8202d",
+            "fallback": true,
+            "fallbackReasons": ["UNKNOWN_DEPENDENCY", "UNMAPPED_CHANGE"],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 561.4941999999864
+          },
+          "selectedTests": [
+            "tests/authentication.test.js",
+            "tests/cart.test.js",
+            "tests/catalog.test.js",
+            "tests/checkout.test.js",
+            "tests/orders.test.js"
+          ],
+          "selected": {
+            "wallMs": 2270.2223999999987,
+            "failedNames": ["known-checkout-total"],
+            "code": 1,
+            "testCount": 8
+          },
+          "full": {
+            "wallMs": 2326.523600000015,
+            "failedNames": ["known-checkout-total"],
+            "code": 1,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": ["known-checkout-total"]
+        },
+        {
+          "iteration": 2,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": [],
+            "durationMs": 141.5586,
+            "peakRssKiB": 80048,
+            "resultHash": "8df6555a2d07ea5b1794b53f3a6730cee58dbf065a7dc1e1b857b74225a8202d",
+            "fallback": true,
+            "fallbackReasons": ["UNKNOWN_DEPENDENCY", "UNMAPPED_CHANGE"],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 471.2253999999957
+          },
+          "selectedTests": [
+            "tests/authentication.test.js",
+            "tests/cart.test.js",
+            "tests/catalog.test.js",
+            "tests/checkout.test.js",
+            "tests/orders.test.js"
+          ],
+          "selected": {
+            "wallMs": 2632.688599999994,
+            "failedNames": ["known-checkout-total"],
+            "code": 1,
+            "testCount": 8
+          },
+          "full": {
+            "wallMs": 4151.967900000018,
+            "failedNames": ["known-checkout-total"],
+            "code": 1,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": ["known-checkout-total"]
+        },
+        {
+          "iteration": 3,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": [],
+            "durationMs": 461.3813000000001,
+            "peakRssKiB": 79624,
+            "resultHash": "8df6555a2d07ea5b1794b53f3a6730cee58dbf065a7dc1e1b857b74225a8202d",
+            "fallback": true,
+            "fallbackReasons": ["UNKNOWN_DEPENDENCY", "UNMAPPED_CHANGE"],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 1411.9698999999964
+          },
+          "selectedTests": [
+            "tests/authentication.test.js",
+            "tests/cart.test.js",
+            "tests/catalog.test.js",
+            "tests/checkout.test.js",
+            "tests/orders.test.js"
+          ],
+          "selected": {
+            "wallMs": 3328.0916000000143,
+            "failedNames": ["known-checkout-total"],
+            "code": 1,
+            "testCount": 8
+          },
+          "full": {
+            "wallMs": 4268.918700000009,
+            "failedNames": ["known-checkout-total"],
+            "code": 1,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": ["known-checkout-total"]
+        },
+        {
+          "iteration": 4,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": [],
+            "durationMs": 169.3508,
+            "peakRssKiB": 79628,
+            "resultHash": "8df6555a2d07ea5b1794b53f3a6730cee58dbf065a7dc1e1b857b74225a8202d",
+            "fallback": true,
+            "fallbackReasons": ["UNKNOWN_DEPENDENCY", "UNMAPPED_CHANGE"],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 561.1400999999896
+          },
+          "selectedTests": [
+            "tests/authentication.test.js",
+            "tests/cart.test.js",
+            "tests/catalog.test.js",
+            "tests/checkout.test.js",
+            "tests/orders.test.js"
+          ],
+          "selected": {
+            "wallMs": 2712.010399999999,
+            "failedNames": ["known-checkout-total"],
+            "code": 1,
+            "testCount": 8
+          },
+          "full": {
+            "wallMs": 2715.3225000000093,
+            "failedNames": ["known-checkout-total"],
+            "code": 1,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": ["known-checkout-total"]
+        },
+        {
+          "iteration": 5,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": [],
+            "durationMs": 178.59349999999995,
+            "peakRssKiB": 79840,
+            "resultHash": "8df6555a2d07ea5b1794b53f3a6730cee58dbf065a7dc1e1b857b74225a8202d",
+            "fallback": true,
+            "fallbackReasons": ["UNKNOWN_DEPENDENCY", "UNMAPPED_CHANGE"],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 586.2705000000133
+          },
+          "selectedTests": [
+            "tests/authentication.test.js",
+            "tests/cart.test.js",
+            "tests/catalog.test.js",
+            "tests/checkout.test.js",
+            "tests/orders.test.js"
+          ],
+          "selected": {
+            "wallMs": 1947.1491000000096,
+            "failedNames": ["known-checkout-total"],
+            "code": 1,
+            "testCount": 8
+          },
+          "full": {
+            "wallMs": 2304.7337000000116,
+            "failedNames": ["known-checkout-total"],
+            "code": 1,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": ["known-checkout-total"]
+        }
+      ],
+      "serializedSnapshotBytes": 7255,
+      "baseSourceBytes": 6615
+    },
+    {
+      "id": "delete-orders",
+      "split": "held-out",
+      "reason": "Removing order history's implementation and registration removes the order journey.",
+      "baseSha": "008b60c44e5f8996d69dcccffaebb5eff4727cec",
+      "headSha": "95a2cd3529b972310f8d678d091c46ddfad8c898",
+      "baseFiles": 22,
+      "headFiles": 20,
+      "sourceBytes": 6227,
+      "expected": ["orders"],
+      "predicted": ["orders"],
+      "truePositives": ["orders"],
+      "falsePositives": [],
+      "missedImpacts": [],
+      "precision": 1,
+      "recall": 1,
+      "knownFailures": ["known-orders-user-scope"],
+      "analysisMs": {
+        "min": 133.0127,
+        "median": 154.05939999999998,
+        "max": 405.14160000000004,
+        "mean": 203.21718
+      },
+      "analysisWallMs": {
+        "min": 444.56359999999404,
+        "median": 497.79999999998836,
+        "max": 1161.5188000000198,
+        "mean": 625.7303399999976
+      },
+      "peakRssMiB": {
+        "min": 77.734375,
+        "median": 77.88671875,
+        "max": 78.06640625,
+        "mean": 77.90546875
+      },
+      "selectedSuiteMs": {
+        "min": 1817.3538999999873,
+        "median": 2055.131400000013,
+        "max": 2565.4707000000053,
+        "mean": 2112.711160000006
+      },
+      "fullSuiteMs": {
+        "min": 1924.4312999999966,
+        "median": 2003.8575000000128,
+        "max": 4219.4881999999925,
+        "mean": 2610.302919999999
+      },
+      "fallback": true,
+      "fallbackReasons": ["MAPPING_REVIEW", "UNMAPPED_CHANGE"],
+      "samples": [
+        {
+          "iteration": 1,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["orders"],
+            "durationMs": 154.05939999999998,
+            "peakRssKiB": 79600,
+            "resultHash": "bd616bb98e2e5bcd093099ca3f1b3d7a1b8e742d22002bfdc1221fce4dd48ad5",
+            "fallback": true,
+            "fallbackReasons": ["MAPPING_REVIEW", "UNMAPPED_CHANGE"],
+            "changes": 3,
+            "baseNodes": 45,
+            "headNodes": 41,
+            "wallMs": 476.6532999999763
+          },
+          "selectedTests": [
+            "tests/authentication.test.js",
+            "tests/cart.test.js",
+            "tests/catalog.test.js",
+            "tests/checkout.test.js",
+            "tests/orders.test.js"
+          ],
+          "selected": {
+            "wallMs": 1817.3538999999873,
+            "failedNames": ["known-orders-user-scope"],
+            "code": 1,
+            "testCount": 8
+          },
+          "full": {
+            "wallMs": 1924.4312999999966,
+            "failedNames": ["known-orders-user-scope"],
+            "code": 1,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": ["known-orders-user-scope"]
+        },
+        {
+          "iteration": 2,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["orders"],
+            "durationMs": 133.0127,
+            "peakRssKiB": 79940,
+            "resultHash": "bd616bb98e2e5bcd093099ca3f1b3d7a1b8e742d22002bfdc1221fce4dd48ad5",
+            "fallback": true,
+            "fallbackReasons": ["MAPPING_REVIEW", "UNMAPPED_CHANGE"],
+            "changes": 3,
+            "baseNodes": 45,
+            "headNodes": 41,
+            "wallMs": 444.56359999999404
+          },
+          "selectedTests": [
+            "tests/authentication.test.js",
+            "tests/cart.test.js",
+            "tests/catalog.test.js",
+            "tests/checkout.test.js",
+            "tests/orders.test.js"
+          ],
+          "selected": {
+            "wallMs": 1903.352600000013,
+            "failedNames": ["known-orders-user-scope"],
+            "code": 1,
+            "testCount": 8
+          },
+          "full": {
+            "wallMs": 1930.6828000000096,
+            "failedNames": ["known-orders-user-scope"],
+            "code": 1,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": ["known-orders-user-scope"]
+        },
+        {
+          "iteration": 3,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["orders"],
+            "durationMs": 139.3057,
+            "peakRssKiB": 79752,
+            "resultHash": "bd616bb98e2e5bcd093099ca3f1b3d7a1b8e742d22002bfdc1221fce4dd48ad5",
+            "fallback": true,
+            "fallbackReasons": ["MAPPING_REVIEW", "UNMAPPED_CHANGE"],
+            "changes": 3,
+            "baseNodes": 45,
+            "headNodes": 41,
+            "wallMs": 497.79999999998836
+          },
+          "selectedTests": [
+            "tests/authentication.test.js",
+            "tests/cart.test.js",
+            "tests/catalog.test.js",
+            "tests/checkout.test.js",
+            "tests/orders.test.js"
+          ],
+          "selected": {
+            "wallMs": 2222.2472000000125,
+            "failedNames": ["known-orders-user-scope"],
+            "code": 1,
+            "testCount": 8
+          },
+          "full": {
+            "wallMs": 2003.8575000000128,
+            "failedNames": ["known-orders-user-scope"],
+            "code": 1,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": ["known-orders-user-scope"]
+        },
+        {
+          "iteration": 4,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["orders"],
+            "durationMs": 184.56650000000002,
+            "peakRssKiB": 79756,
+            "resultHash": "bd616bb98e2e5bcd093099ca3f1b3d7a1b8e742d22002bfdc1221fce4dd48ad5",
+            "fallback": true,
+            "fallbackReasons": ["MAPPING_REVIEW", "UNMAPPED_CHANGE"],
+            "changes": 3,
+            "baseNodes": 45,
+            "headNodes": 41,
+            "wallMs": 548.1160000000091
+          },
+          "selectedTests": [
+            "tests/authentication.test.js",
+            "tests/cart.test.js",
+            "tests/catalog.test.js",
+            "tests/checkout.test.js",
+            "tests/orders.test.js"
+          ],
+          "selected": {
+            "wallMs": 2565.4707000000053,
+            "failedNames": ["known-orders-user-scope"],
+            "code": 1,
+            "testCount": 8
+          },
+          "full": {
+            "wallMs": 4219.4881999999925,
+            "failedNames": ["known-orders-user-scope"],
+            "code": 1,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": ["known-orders-user-scope"]
+        },
+        {
+          "iteration": 5,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["orders"],
+            "durationMs": 405.14160000000004,
+            "peakRssKiB": 79828,
+            "resultHash": "bd616bb98e2e5bcd093099ca3f1b3d7a1b8e742d22002bfdc1221fce4dd48ad5",
+            "fallback": true,
+            "fallbackReasons": ["MAPPING_REVIEW", "UNMAPPED_CHANGE"],
+            "changes": 3,
+            "baseNodes": 45,
+            "headNodes": 41,
+            "wallMs": 1161.5188000000198
+          },
+          "selectedTests": [
+            "tests/authentication.test.js",
+            "tests/cart.test.js",
+            "tests/catalog.test.js",
+            "tests/checkout.test.js",
+            "tests/orders.test.js"
+          ],
+          "selected": {
+            "wallMs": 2055.131400000013,
+            "failedNames": ["known-orders-user-scope"],
+            "code": 1,
+            "testCount": 8
+          },
+          "full": {
+            "wallMs": 2973.0547999999835,
+            "failedNames": ["known-orders-user-scope"],
+            "code": 1,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": ["known-orders-user-scope"]
+        }
+      ],
+      "serializedSnapshotBytes": 6812,
+      "baseSourceBytes": 6562
+    },
+    {
+      "id": "auth-bypass-bug",
+      "split": "held-out",
+      "reason": "Removing the common authentication check exposes all protected journeys.",
+      "baseSha": "008b60c44e5f8996d69dcccffaebb5eff4727cec",
+      "headSha": "fe05c19dbe764bb08cb8046ce868a011af427bf7",
+      "baseFiles": 22,
+      "headFiles": 22,
+      "sourceBytes": 6535,
+      "expected": ["authentication", "cart", "checkout", "orders"],
+      "predicted": ["authentication", "cart", "checkout", "orders"],
+      "truePositives": ["authentication", "cart", "checkout", "orders"],
+      "falsePositives": [],
+      "missedImpacts": [],
+      "precision": 1,
+      "recall": 1,
+      "knownFailures": ["known-auth-rejects-anonymous"],
+      "analysisMs": {
+        "min": 133.152,
+        "median": 147.7976,
+        "max": 422.74309999999997,
+        "mean": 205.43327999999997
+      },
+      "analysisWallMs": {
+        "min": 456.47060000000056,
+        "median": 523.0712999999814,
+        "max": 916.9563999999955,
+        "mean": 591.5465999999957
+      },
+      "peakRssMiB": {
+        "min": 77.66015625,
+        "median": 78.0390625,
+        "max": 78.08203125,
+        "mean": 77.94765625
+      },
+      "selectedSuiteMs": {
+        "min": 1765.3522999999986,
+        "median": 1836.6338000000105,
+        "max": 2072.559200000018,
+        "mean": 1869.2359600000084
+      },
+      "fullSuiteMs": {
+        "min": 1891.9382999999798,
+        "median": 2150.3618000000133,
+        "max": 5269.5395000000135,
+        "mean": 2694.1303799999996
+      },
+      "fallback": false,
+      "fallbackReasons": [],
+      "samples": [
+        {
+          "iteration": 1,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["authentication", "cart", "checkout", "orders"],
+            "durationMs": 422.74309999999997,
+            "peakRssKiB": 79956,
+            "resultHash": "72698aa646f228db7e54c71d60fb8abba421bcb4b4d2e626343fd5441494aa0f",
+            "fallback": false,
+            "fallbackReasons": [],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 916.9563999999955
+          },
+          "selectedTests": [
+            "tests/authentication.test.js",
+            "tests/cart.test.js",
+            "tests/checkout.test.js",
+            "tests/orders.test.js"
+          ],
+          "selected": {
+            "wallMs": 2072.559200000018,
+            "failedNames": ["known-auth-rejects-anonymous"],
+            "code": 1,
+            "testCount": 7
+          },
+          "full": {
+            "wallMs": 5269.5395000000135,
+            "failedNames": ["known-auth-rejects-anonymous"],
+            "code": 1,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": ["known-auth-rejects-anonymous"]
+        },
+        {
+          "iteration": 2,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["authentication", "cart", "checkout", "orders"],
+            "durationMs": 133.152,
+            "peakRssKiB": 79912,
+            "resultHash": "72698aa646f228db7e54c71d60fb8abba421bcb4b4d2e626343fd5441494aa0f",
+            "fallback": false,
+            "fallbackReasons": [],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 523.0712999999814
+          },
+          "selectedTests": [
+            "tests/authentication.test.js",
+            "tests/cart.test.js",
+            "tests/checkout.test.js",
+            "tests/orders.test.js"
+          ],
+          "selected": {
+            "wallMs": 1885.651199999993,
+            "failedNames": ["known-auth-rejects-anonymous"],
+            "code": 1,
+            "testCount": 7
+          },
+          "full": {
+            "wallMs": 2150.3618000000133,
+            "failedNames": ["known-auth-rejects-anonymous"],
+            "code": 1,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": ["known-auth-rejects-anonymous"]
+        },
+        {
+          "iteration": 3,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["authentication", "cart", "checkout", "orders"],
+            "durationMs": 189.99560000000002,
+            "peakRssKiB": 79524,
+            "resultHash": "72698aa646f228db7e54c71d60fb8abba421bcb4b4d2e626343fd5441494aa0f",
+            "fallback": false,
+            "fallbackReasons": [],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 560.6913999999815
+          },
+          "selectedTests": [
+            "tests/authentication.test.js",
+            "tests/cart.test.js",
+            "tests/checkout.test.js",
+            "tests/orders.test.js"
+          ],
+          "selected": {
+            "wallMs": 1765.3522999999986,
+            "failedNames": ["known-auth-rejects-anonymous"],
+            "code": 1,
+            "testCount": 7
+          },
+          "full": {
+            "wallMs": 2237.217499999999,
+            "failedNames": ["known-auth-rejects-anonymous"],
+            "code": 1,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": ["known-auth-rejects-anonymous"]
+        },
+        {
+          "iteration": 4,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["authentication", "cart", "checkout", "orders"],
+            "durationMs": 147.7976,
+            "peakRssKiB": 79912,
+            "resultHash": "72698aa646f228db7e54c71d60fb8abba421bcb4b4d2e626343fd5441494aa0f",
+            "fallback": false,
+            "fallbackReasons": [],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 500.54330000001937
+          },
+          "selectedTests": [
+            "tests/authentication.test.js",
+            "tests/cart.test.js",
+            "tests/checkout.test.js",
+            "tests/orders.test.js"
+          ],
+          "selected": {
+            "wallMs": 1785.9833000000217,
+            "failedNames": ["known-auth-rejects-anonymous"],
+            "code": 1,
+            "testCount": 7
+          },
+          "full": {
+            "wallMs": 1891.9382999999798,
+            "failedNames": ["known-auth-rejects-anonymous"],
+            "code": 1,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": ["known-auth-rejects-anonymous"]
+        },
+        {
+          "iteration": 5,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["authentication", "cart", "checkout", "orders"],
+            "durationMs": 133.47809999999998,
+            "peakRssKiB": 79788,
+            "resultHash": "72698aa646f228db7e54c71d60fb8abba421bcb4b4d2e626343fd5441494aa0f",
+            "fallback": false,
+            "fallbackReasons": [],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 456.47060000000056
+          },
+          "selectedTests": [
+            "tests/authentication.test.js",
+            "tests/cart.test.js",
+            "tests/checkout.test.js",
+            "tests/orders.test.js"
+          ],
+          "selected": {
+            "wallMs": 1836.6338000000105,
+            "failedNames": ["known-auth-rejects-anonymous"],
+            "code": 1,
+            "testCount": 7
+          },
+          "full": {
+            "wallMs": 1921.5947999999917,
+            "failedNames": ["known-auth-rejects-anonymous"],
+            "code": 1,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": ["known-auth-rejects-anonymous"]
+        }
+      ],
+      "serializedSnapshotBytes": 7169,
+      "baseSourceBytes": 6562
+    },
+    {
+      "id": "checkout-arithmetic-bug",
+      "split": "held-out",
+      "reason": "Addition instead of multiplication changes only checkout totals.",
+      "baseSha": "008b60c44e5f8996d69dcccffaebb5eff4727cec",
+      "headSha": "33c701ec13c7c9524f1235649de4b6054ae887fa",
+      "baseFiles": 22,
+      "headFiles": 22,
+      "sourceBytes": 6562,
+      "expected": ["checkout"],
+      "predicted": ["checkout"],
+      "truePositives": ["checkout"],
+      "falsePositives": [],
+      "missedImpacts": [],
+      "precision": 1,
+      "recall": 1,
+      "knownFailures": ["known-checkout-total"],
+      "analysisMs": {
+        "min": 150.47230000000002,
+        "median": 157.2726,
+        "max": 224.22549999999995,
+        "mean": 174.05418000000003
+      },
+      "analysisWallMs": {
+        "min": 517.2170000000042,
+        "median": 555.9413999999815,
+        "max": 783.3798999999999,
+        "mean": 632.532039999991
+      },
+      "peakRssMiB": {
+        "min": 77.7890625,
+        "median": 78.015625,
+        "max": 79.84375,
+        "mean": 78.64765625
+      },
+      "selectedSuiteMs": {
+        "min": 510.8380999999936,
+        "median": 581.9471999999951,
+        "max": 786.8310000000056,
+        "mean": 625.165499999997
+      },
+      "fullSuiteMs": {
+        "min": 2096.306500000006,
+        "median": 2313.378700000001,
+        "max": 3375.561400000006,
+        "mean": 2519.3865600000017
+      },
+      "fallback": false,
+      "fallbackReasons": [],
+      "samples": [
+        {
+          "iteration": 1,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["checkout"],
+            "durationMs": 224.22549999999995,
+            "peakRssKiB": 81520,
+            "resultHash": "97d94d6fa37f6a3704772147b32187620414140c76fdfbfefb8433b476e2e243",
+            "fallback": false,
+            "fallbackReasons": [],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 770.7279999999737
+          },
+          "selectedTests": ["tests/checkout.test.js"],
+          "selected": {
+            "wallMs": 702.7753999999841,
+            "failedNames": ["known-checkout-total"],
+            "code": 1,
+            "testCount": 2
+          },
+          "full": {
+            "wallMs": 3375.561400000006,
+            "failedNames": ["known-checkout-total"],
+            "code": 1,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": ["known-checkout-total"]
+        },
+        {
+          "iteration": 2,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["checkout"],
+            "durationMs": 187.3514,
+            "peakRssKiB": 81760,
+            "resultHash": "97d94d6fa37f6a3704772147b32187620414140c76fdfbfefb8433b476e2e243",
+            "fallback": false,
+            "fallbackReasons": [],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 783.3798999999999
+          },
+          "selectedTests": ["tests/checkout.test.js"],
+          "selected": {
+            "wallMs": 786.8310000000056,
+            "failedNames": ["known-checkout-total"],
+            "code": 1,
+            "testCount": 2
+          },
+          "full": {
+            "wallMs": 2554.4870999999985,
+            "failedNames": ["known-checkout-total"],
+            "code": 1,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": ["known-checkout-total"]
+        },
+        {
+          "iteration": 3,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["checkout"],
+            "durationMs": 157.2726,
+            "peakRssKiB": 79888,
+            "resultHash": "97d94d6fa37f6a3704772147b32187620414140c76fdfbfefb8433b476e2e243",
+            "fallback": false,
+            "fallbackReasons": [],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 555.9413999999815
+          },
+          "selectedTests": ["tests/checkout.test.js"],
+          "selected": {
+            "wallMs": 581.9471999999951,
+            "failedNames": ["known-checkout-total"],
+            "code": 1,
+            "testCount": 2
+          },
+          "full": {
+            "wallMs": 2313.378700000001,
+            "failedNames": ["known-checkout-total"],
+            "code": 1,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": ["known-checkout-total"]
+        },
+        {
+          "iteration": 4,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["checkout"],
+            "durationMs": 150.9491,
+            "peakRssKiB": 79656,
+            "resultHash": "97d94d6fa37f6a3704772147b32187620414140c76fdfbfefb8433b476e2e243",
+            "fallback": false,
+            "fallbackReasons": [],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 535.3938999999955
+          },
+          "selectedTests": ["tests/checkout.test.js"],
+          "selected": {
+            "wallMs": 510.8380999999936,
+            "failedNames": ["known-checkout-total"],
+            "code": 1,
+            "testCount": 2
+          },
+          "full": {
+            "wallMs": 2096.306500000006,
+            "failedNames": ["known-checkout-total"],
+            "code": 1,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": ["known-checkout-total"]
+        },
+        {
+          "iteration": 5,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["checkout"],
+            "durationMs": 150.47230000000002,
+            "peakRssKiB": 79852,
+            "resultHash": "97d94d6fa37f6a3704772147b32187620414140c76fdfbfefb8433b476e2e243",
+            "fallback": false,
+            "fallbackReasons": [],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 517.2170000000042
+          },
+          "selectedTests": ["tests/checkout.test.js"],
+          "selected": {
+            "wallMs": 543.4358000000066,
+            "failedNames": ["known-checkout-total"],
+            "code": 1,
+            "testCount": 2
+          },
+          "full": {
+            "wallMs": 2257.199099999998,
+            "failedNames": ["known-checkout-total"],
+            "code": 1,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": ["known-checkout-total"]
+        }
+      ],
+      "serializedSnapshotBytes": 7196,
+      "baseSourceBytes": 6562
+    },
+    {
+      "id": "catalog-price-bug",
+      "split": "held-out",
+      "reason": "Product data is consumed by the public catalog and cart product validation; checkout accepts its independent input price.",
+      "baseSha": "008b60c44e5f8996d69dcccffaebb5eff4727cec",
+      "headSha": "432dad9cf963432c6d4b3297c6ec4c3c5e6edbce",
+      "baseFiles": 22,
+      "headFiles": 22,
+      "sourceBytes": 6563,
+      "expected": ["cart", "catalog"],
+      "predicted": ["cart", "catalog"],
+      "truePositives": ["cart", "catalog"],
+      "falsePositives": [],
+      "missedImpacts": [],
+      "precision": 1,
+      "recall": 1,
+      "knownFailures": ["known-catalog-price"],
+      "analysisMs": {
+        "min": 130.06459999999998,
+        "median": 137.6572,
+        "max": 163.40120000000002,
+        "mean": 141.85468
+      },
+      "analysisWallMs": {
+        "min": 455.1832000000286,
+        "median": 467.39569999999367,
+        "max": 530.7552999999898,
+        "mean": 476.9163399999961
+      },
+      "peakRssMiB": {
+        "min": 77.75390625,
+        "median": 77.89453125,
+        "max": 78.18359375,
+        "mean": 77.9359375
+      },
+      "selectedSuiteMs": {
+        "min": 788.3538000000408,
+        "median": 820.1165000000037,
+        "max": 942.3496000000159,
+        "mean": 852.8516400000196
+      },
+      "fullSuiteMs": {
+        "min": 1835.3146000000124,
+        "median": 2180.434200000018,
+        "max": 2322.52840000001,
+        "mean": 2123.5914400000124
+      },
+      "fallback": false,
+      "fallbackReasons": [],
+      "samples": [
+        {
+          "iteration": 1,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["cart", "catalog"],
+            "durationMs": 163.40120000000002,
+            "peakRssKiB": 79620,
+            "resultHash": "5de063d8710a9348ab9a6ce23f5acfc8b6f5008df389eed58b3e6cceeef84574",
+            "fallback": false,
+            "fallbackReasons": [],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 530.7552999999898
+          },
+          "selectedTests": ["tests/cart.test.js", "tests/catalog.test.js"],
+          "selected": {
+            "wallMs": 820.1165000000037,
+            "failedNames": ["known-catalog-price"],
+            "code": 1,
+            "testCount": 3
+          },
+          "full": {
+            "wallMs": 2209.0972000000183,
+            "failedNames": ["known-catalog-price"],
+            "code": 1,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": ["known-catalog-price"]
+        },
+        {
+          "iteration": 2,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["cart", "catalog"],
+            "durationMs": 137.05200000000002,
+            "peakRssKiB": 80060,
+            "resultHash": "5de063d8710a9348ab9a6ce23f5acfc8b6f5008df389eed58b3e6cceeef84574",
+            "fallback": false,
+            "fallbackReasons": [],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 467.39569999999367
+          },
+          "selectedTests": ["tests/cart.test.js", "tests/catalog.test.js"],
+          "selected": {
+            "wallMs": 819.835000000021,
+            "failedNames": ["known-catalog-price"],
+            "code": 1,
+            "testCount": 3
+          },
+          "full": {
+            "wallMs": 2070.5828000000038,
+            "failedNames": ["known-catalog-price"],
+            "code": 1,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": ["known-catalog-price"]
+        },
+        {
+          "iteration": 3,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["cart", "catalog"],
+            "durationMs": 141.0984,
+            "peakRssKiB": 79764,
+            "resultHash": "5de063d8710a9348ab9a6ce23f5acfc8b6f5008df389eed58b3e6cceeef84574",
+            "fallback": false,
+            "fallbackReasons": [],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 455.504099999991
+          },
+          "selectedTests": ["tests/cart.test.js", "tests/catalog.test.js"],
+          "selected": {
+            "wallMs": 788.3538000000408,
+            "failedNames": ["known-catalog-price"],
+            "code": 1,
+            "testCount": 3
+          },
+          "full": {
+            "wallMs": 1835.3146000000124,
+            "failedNames": ["known-catalog-price"],
+            "code": 1,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": ["known-catalog-price"]
+        },
+        {
+          "iteration": 4,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["cart", "catalog"],
+            "durationMs": 137.6572,
+            "peakRssKiB": 79740,
+            "resultHash": "5de063d8710a9348ab9a6ce23f5acfc8b6f5008df389eed58b3e6cceeef84574",
+            "fallback": false,
+            "fallbackReasons": [],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 475.74339999997756
+          },
+          "selectedTests": ["tests/cart.test.js", "tests/catalog.test.js"],
+          "selected": {
+            "wallMs": 893.603300000017,
+            "failedNames": ["known-catalog-price"],
+            "code": 1,
+            "testCount": 3
+          },
+          "full": {
+            "wallMs": 2322.52840000001,
+            "failedNames": ["known-catalog-price"],
+            "code": 1,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": ["known-catalog-price"]
+        },
+        {
+          "iteration": 5,
+          "analysis": {
+            "engineVersion": "7.0.0",
+            "predicted": ["cart", "catalog"],
+            "durationMs": 130.06459999999998,
+            "peakRssKiB": 79848,
+            "resultHash": "5de063d8710a9348ab9a6ce23f5acfc8b6f5008df389eed58b3e6cceeef84574",
+            "fallback": false,
+            "fallbackReasons": [],
+            "changes": 1,
+            "baseNodes": 45,
+            "headNodes": 45,
+            "wallMs": 455.1832000000286
+          },
+          "selectedTests": ["tests/cart.test.js", "tests/catalog.test.js"],
+          "selected": {
+            "wallMs": 942.3496000000159,
+            "failedNames": ["known-catalog-price"],
+            "code": 1,
+            "testCount": 3
+          },
+          "full": {
+            "wallMs": 2180.434200000018,
+            "failedNames": ["known-catalog-price"],
+            "code": 1,
+            "testCount": 8
+          },
+          "knownDetectedBySelected": ["known-catalog-price"]
+        }
+      ],
+      "serializedSnapshotBytes": 7197,
+      "baseSourceBytes": 6562
+    }
+  ],
+  "notMeasured": [
+    "Production repository accuracy or savings",
+    "Distributed production load and crash-recovery latency",
+    "Container-level memory and fixture-browser interaction latency"
+  ]
+}

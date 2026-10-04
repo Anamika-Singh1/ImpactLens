@@ -1,0 +1,44 @@
+# Standalone application packaging; external private PostgreSQL/Redis and HTTPS edge required.
+services:
+  migrate:
+    image: impactlens-migrate:${RELEASE_TAG:-local}
+    build: { context: ., target: migrate }
+    env_file: deploy/production.env
+    environment: { NODE_ENV: production }
+    profiles: [release]
+    restart: 'no'
+  api:
+    image: impactlens-api:${RELEASE_TAG:-local}
+    build: { context: ., target: api }
+    env_file: deploy/production.env
+    environment: { NODE_ENV: production, HOST: 0.0.0.0 }
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 25s
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+  worker:
+    image: impactlens-worker:${RELEASE_TAG:-local}
+    build: { context: ., target: worker }
+    env_file: deploy/production.env
+    environment: { NODE_ENV: production }
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 20s
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+  web:
+    image: impactlens-web:${RELEASE_TAG:-local}
+    build: { context: ., target: web }
+    ports: ['127.0.0.1:8080:8080']
+    depends_on: { api: { condition: service_healthy } }
+    restart: unless-stopped
+    stop_grace_period: 10s
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]

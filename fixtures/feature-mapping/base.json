@@ -1,0 +1,6 @@
+{
+  "src/checkout.ts": "export function checkout() {\n  return 'order placed';\n}\n",
+  "src/server.ts": "import express from 'express';\nimport { checkout } from './checkout';\nconst app = express();\napp.post('/checkout', checkout);\n",
+  "tests/checkout.test.ts": "import { checkout } from '../src/checkout';\nexport const expected = checkout;\n",
+  "src/profile.ts": "export const profile = 'customer';\n"
+}

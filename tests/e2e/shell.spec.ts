@@ -22,7 +22,10 @@ test('shell reaches the real API and navigates to honest empty states', async ({
       .getByRole('link', { name: title, exact: true })
       .click();
     await expect(
-      page.getByRole('heading', { name: title, exact: true }),
+      page.getByRole('heading', {
+        name: title === 'Analyses' ? 'Change impact' : title,
+        exact: true,
+      }),
     ).toBeVisible();
   }
 });

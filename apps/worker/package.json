@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "dev": "nodemon --watch src --watch ../../packages/shared/dist --ext ts,js --exec ts-node src/main.ts",
+    "dev": "nodemon --watch src --watch ../../packages/shared/dist --watch ../../packages/ingestion/dist --ext ts,js --exec ts-node src/main.ts",
     "start": "node dist/main.js",
     "check:redis": "node dist/main.js --check"
   },
@@ -13,7 +13,9 @@
     "bullmq": "^5.61.0",
     "dotenv": "^16.6.1",
     "ioredis": "^5.8.2",
-    "pino": "^9.14.0"
+    "pino": "^9.14.0",
+    "@impactlens/ingestion": "0.1.0",
+    "@prisma/client": "6.19.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.10",

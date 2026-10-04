@@ -1,0 +1,4 @@
+{
+  "src/main.ts": "import { sum } from './core/math';\nimport './deleted';\nexport const result = sum(3, 4);\n",
+  "src/core/math.ts": "export function sum(a: number, b: number) { return a + b; }\n"
+}

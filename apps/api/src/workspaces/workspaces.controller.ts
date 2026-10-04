@@ -46,15 +46,6 @@ class RepositoryDto {
   @IsString() @Length(1, 100) @Matches(/^[a-zA-Z0-9_.-]+$/) owner!: string;
   @IsString() @Length(1, 100) @Matches(/^[a-zA-Z0-9_.-]+$/) name!: string;
 }
-class FeatureDto {
-  @IsString() @Length(1, 100) @Matches(/^[a-zA-Z0-9_.-]+$/) key!: string;
-  @IsString() @Length(1, 150) @Matches(/\S/) name!: string;
-}
-class MappingDto {
-  @IsUUID() snapshotId!: string;
-  @IsUUID() fileId!: string;
-  @IsString() @Length(1, 2000) @Matches(/\S/) rationale!: string;
-}
 class AnalysisDto {
   @IsUUID() baseSnapshotId!: string;
   @IsUUID() headSnapshotId!: string;
@@ -286,107 +277,6 @@ export class WorkspacesController {
       throw error;
     }
   }
-  @Get(':workspaceId/repositories/:repositoryId/features')
-  async features(
-    @Param('workspaceId', ParseUUIDPipe) workspaceId: string,
-    @Param('repositoryId', ParseUUIDPipe) repositoryId: string,
-  ) {
-    await this.repository(workspaceId, repositoryId);
-    return this.db.businessFeature.findMany({
-      where: { workspaceId, repositoryId },
-      include: { mappings: true },
-    });
-  }
-  @Post(':workspaceId/repositories/:repositoryId/features')
-  @RequirePermission('features:manage')
-  async createFeature(
-    @Param('workspaceId', ParseUUIDPipe) workspaceId: string,
-    @Param('repositoryId', ParseUUIDPipe) repositoryId: string,
-    @Body() input: FeatureDto,
-    @Req() request: AuthRequest,
-    @Res({ passthrough: true }) response: Response,
-  ) {
-    await this.repository(workspaceId, repositoryId);
-    try {
-      return await this.db.$transaction(async (tx) => {
-        const feature = await tx.businessFeature.create({
-          data: {
-            workspaceId,
-            repositoryId,
-            key: input.key,
-            name: input.name.trim(),
-          },
-        });
-        await tx.auditEvent.create({
-          data: this.audit(
-            request,
-            response,
-            workspaceId,
-            'feature.created',
-            feature.id,
-            repositoryId,
-          ),
-        });
-        return feature;
-      });
-    } catch (error) {
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2002'
-      )
-        throw new ConflictException('Feature key already exists');
-      throw error;
-    }
-  }
-  @Post(':workspaceId/repositories/:repositoryId/features/:featureId/mappings')
-  @RequirePermission('features:manage')
-  async createMapping(
-    @Param('workspaceId', ParseUUIDPipe) workspaceId: string,
-    @Param('repositoryId', ParseUUIDPipe) repositoryId: string,
-    @Param('featureId', ParseUUIDPipe) featureId: string,
-    @Body() input: MappingDto,
-    @Req() request: AuthRequest,
-    @Res({ passthrough: true }) response: Response,
-  ) {
-    const feature = await this.db.businessFeature.findFirst({
-      where: { id: featureId, workspaceId, repositoryId },
-    });
-    const file = await this.db.sourceFile.findFirst({
-      where: {
-        id: input.fileId,
-        snapshotId: input.snapshotId,
-        workspaceId,
-        repositoryId,
-      },
-    });
-    if (!feature || !file)
-      throw new NotFoundException('Feature or source file not found');
-    try {
-      return await this.db.$transaction(async (tx) => {
-        const mapping = await tx.featureMapping.create({
-          data: { ...input, workspaceId, repositoryId, featureId },
-        });
-        await tx.auditEvent.create({
-          data: this.audit(
-            request,
-            response,
-            workspaceId,
-            'feature.mapping_created',
-            mapping.id,
-            repositoryId,
-          ),
-        });
-        return mapping;
-      });
-    } catch (error) {
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2002'
-      )
-        throw new ConflictException('Mapping already exists');
-      throw error;
-    }
-  }
   @Get(':workspaceId/repositories/:repositoryId/analyses')
   async analyses(
     @Param('workspaceId', ParseUUIDPipe) workspaceId: string,
@@ -396,6 +286,15 @@ export class WorkspacesController {
     return this.db.analysis.findMany({
       where: { workspaceId, repositoryId },
       orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        workspaceId: true,
+        repositoryId: true,
+        baseSnapshotId: true,
+        headSnapshotId: true,
+        status: true,
+        createdAt: true,
+      },
     });
   }
   @Post(':workspaceId/repositories/:repositoryId/analyses')

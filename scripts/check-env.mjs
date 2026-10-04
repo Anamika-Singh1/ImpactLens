@@ -10,7 +10,7 @@ const env = {
 for (const key of ['DATABASE_URL', 'REDIS_URL', 'WEB_ORIGIN']) delete env[key];
 for (const [app, fields] of [
   ['api', ['DATABASE_URL', 'REDIS_URL', 'WEB_ORIGIN']],
-  ['worker', ['REDIS_URL']],
+  ['worker', ['REDIS_URL', 'DATABASE_URL']],
 ]) {
   const result = spawnSync(
     process.execPath,

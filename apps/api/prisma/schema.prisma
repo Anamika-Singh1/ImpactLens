@@ -7,6 +7,83 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum RepositorySource {
+  METADATA
+  GITHUB
+  FIXTURE
+}
+
+enum ImportStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELED
+}
+
+model GitHubAuthorization {
+  userId         String   @id @db.Uuid
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  githubUserId   String
+  login          String
+  encryptedToken String
+  expiresAt      DateTime
+}
+
+model GitHubFlow {
+  stateHash   String    @id @db.Char(64)
+  userId      String    @db.Uuid
+  sessionId   String    @db.Uuid
+  workspaceId String    @db.Uuid
+  verifier    String
+  expiresAt   DateTime
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session     Session   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
+}
+
+model GitHubInstallation {
+  id                   String       @id @default(uuid()) @db.Uuid
+  workspaceId          String       @db.Uuid
+  githubInstallationId String
+  account              String
+  createdAt            DateTime     @default(now())
+  workspace            Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  repositories         Repository[]
+
+  @@unique([id, workspaceId])
+  @@unique([workspaceId, githubInstallationId])
+}
+
+model ImportJob {
+  id            String              @id @default(uuid()) @db.Uuid
+  workspaceId   String              @db.Uuid
+  repositoryId  String              @db.Uuid
+  requestedById String              @db.Uuid
+  commitSha     String              @db.VarChar(64)
+  branch        String              @db.VarChar(255)
+  status        ImportStatus        @default(QUEUED)
+  progress      Int                 @default(0)
+  stage         String              @default("Waiting for worker")
+  generation    Int                 @default(1)
+  attempts      Int                 @default(0)
+  errorCode     String?
+  errorMessage  String?
+  snapshotId    String?             @db.Uuid
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  finishedAt    DateTime?
+  repository    Repository          @relation(fields: [repositoryId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+  requestedBy   User                @relation(fields: [requestedById], references: [id], onDelete: Restrict)
+  snapshot      RepositorySnapshot? @relation(fields: [snapshotId, repositoryId, workspaceId], references: [id, repositoryId, workspaceId], onDelete: NoAction)
+
+  @@unique([workspaceId, repositoryId, commitSha])
+  @@index([workspaceId, createdAt])
+  @@index([status, updatedAt])
+}
+
 enum Role {
   OWNER
   ENGINEER
@@ -54,41 +131,74 @@ enum ReviewOutcome {
   APPROVED
   CHANGES_REQUESTED
   ACKNOWLEDGED
+  NEEDS_MORE_EVIDENCE
 }
 
 model User {
-  id           String           @id @default(uuid()) @db.Uuid
-  email        String           @unique @db.VarChar(254)
-  name         String           @db.VarChar(100)
-  passwordHash String
-  createdAt    DateTime         @default(now())
-  sessions     Session[]
-  memberships  Membership[]
-  reviews      ReviewDecision[]
-  auditEvents  AuditEvent[]
+  confirmedMappings FeatureMapping[]     @relation("MappingConfirmer")
+  mappingRevisions  MappingRevision[]
+  githubAuth        GitHubAuthorization?
+  githubFlows       GitHubFlow[]
+  importJobs        ImportJob[]
+  id                String               @id @default(uuid()) @db.Uuid
+  email             String               @unique @db.VarChar(254)
+  name              String               @db.VarChar(100)
+  passwordHash      String
+  createdAt         DateTime             @default(now())
+  sessions          Session[]
+  memberships       Membership[]
+  reviews           ReviewDecision[]
+  auditEvents       AuditEvent[]
 }
 
 model Session {
-  id        String   @id @default(uuid()) @db.Uuid
-  tokenHash String   @unique @db.Char(64)
-  csrfToken String   @db.VarChar(64)
-  userId    String?  @db.Uuid
-  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  expiresAt DateTime
+  githubFlows GitHubFlow[]
+  id          String       @id @default(uuid()) @db.Uuid
+  tokenHash   String       @unique @db.Char(64)
+  csrfToken   String       @db.VarChar(64)
+  userId      String?      @db.Uuid
+  user        User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime     @default(now())
+  expiresAt   DateTime
 
   @@index([userId])
   @@index([expiresAt])
 }
 
 model Workspace {
-  id           String       @id @default(uuid()) @db.Uuid
-  name         String       @db.VarChar(100)
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-  memberships  Membership[]
-  repositories Repository[]
-  auditEvents  AuditEvent[]
+  aiEnabled        Boolean              @default(false)
+  aiConsentVersion Int                  @default(0)
+  aiExplanations   AiExplanation[]
+  aiUsage          AiUsage[]
+  installations    GitHubInstallation[]
+  githubFlows      GitHubFlow[]
+  id               String               @id @default(uuid()) @db.Uuid
+  name             String               @db.VarChar(100)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  memberships      Membership[]
+  repositories     Repository[]
+  auditEvents      AuditEvent[]
+}
+
+model AiExplanation {
+  workspaceId String    @db.Uuid
+  cacheKey    String    @db.Char(64)
+  response    Json
+  createdAt   DateTime  @default(now())
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@id([workspaceId, cacheKey])
+}
+
+model AiUsage {
+  workspaceId    String    @db.Uuid
+  day            String    @db.VarChar(10)
+  requests       Int       @default(0)
+  reservedTokens Int       @default(0)
+  workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@id([workspaceId, day])
 }
 
 model Membership {
@@ -104,41 +214,86 @@ model Membership {
 }
 
 model Repository {
-  id          String               @id @default(uuid()) @db.Uuid
-  workspaceId String               @db.Uuid
-  owner       String               @db.VarChar(100)
-  name        String               @db.VarChar(100)
-  createdAt   DateTime             @default(now())
-  updatedAt   DateTime             @updatedAt
-  workspace   Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  snapshots   RepositorySnapshot[]
-  features    BusinessFeature[]
-  analyses    Analysis[]
-  auditEvents AuditEvent[]
+  description        String?
+  isPrivate          Boolean?
+  defaultBranch      String?
+  testArtifacts      TestArtifact[]
+  source             RepositorySource     @default(METADATA)
+  githubRepositoryId String?
+  installationId     String?              @db.Uuid
+  installation       GitHubInstallation?  @relation(fields: [installationId, workspaceId], references: [id, workspaceId], onDelete: NoAction)
+  importJobs         ImportJob[]
+  id                 String               @id @default(uuid()) @db.Uuid
+  workspaceId        String               @db.Uuid
+  owner              String               @db.VarChar(100)
+  name               String               @db.VarChar(100)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  workspace          Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  snapshots          RepositorySnapshot[]
+  features           BusinessFeature[]
+  analyses           Analysis[]
+  auditEvents        AuditEvent[]
 
   @@unique([id, workspaceId])
   @@unique([workspaceId, owner, name])
+  @@unique([workspaceId, githubRepositoryId])
 }
 
 model RepositorySnapshot {
-  id           String       @id @default(uuid()) @db.Uuid
-  workspaceId  String       @db.Uuid
-  repositoryId String       @db.Uuid
-  commitSha    String       @db.VarChar(64)
-  createdAt    DateTime     @default(now())
-  repository   Repository   @relation(fields: [repositoryId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
-  files        SourceFile[]
-  evidence     Evidence[]
-  testRuns     TestRun[]
-  baseAnalyses Analysis[]   @relation("BaseSnapshot")
-  headAnalyses Analysis[]   @relation("HeadSnapshot")
+  overview       RepositoryOverview?
+  mappingHistory MappingRevision[]
+  staticGraph    StaticGraph?
+  isDemo         Boolean           @default(false)
+  importSummary  Json?
+  importJobs     ImportJob[]
+  id             String            @id @default(uuid()) @db.Uuid
+  workspaceId    String            @db.Uuid
+  repositoryId   String            @db.Uuid
+  commitSha      String            @db.VarChar(64)
+  createdAt      DateTime          @default(now())
+  repository     Repository        @relation(fields: [repositoryId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+  files          SourceFile[]
+  evidence       Evidence[]
+  testRuns       TestRun[]
+  baseAnalyses   Analysis[]        @relation("BaseSnapshot")
+  headAnalyses   Analysis[]        @relation("HeadSnapshot")
 
   @@unique([id, repositoryId, workspaceId])
   @@unique([id, repositoryId, workspaceId, commitSha])
   @@unique([workspaceId, repositoryId, commitSha])
 }
 
+model RepositoryOverview {
+  snapshotId   String             @id @db.Uuid
+  workspaceId  String             @db.Uuid
+  repositoryId String             @db.Uuid
+  version      String             @db.VarChar(30)
+  data         Json
+  analyzedAt   DateTime           @default(now())
+  snapshot     RepositorySnapshot @relation(fields: [snapshotId, repositoryId, workspaceId], references: [id, repositoryId, workspaceId], onDelete: Cascade)
+
+  @@unique([snapshotId, repositoryId, workspaceId])
+  @@index([workspaceId, repositoryId])
+}
+
+// Atomic, versioned snapshot graph. Nodes and typed edges carry source evidence.
+// The composite foreign key prevents cross-workspace snapshot attachment.
+model StaticGraph {
+  snapshotId   String             @id @db.Uuid
+  workspaceId  String             @db.Uuid
+  repositoryId String             @db.Uuid
+  version      String             @db.VarChar(30)
+  graph        Json
+  analyzedAt   DateTime           @default(now())
+  snapshot     RepositorySnapshot @relation(fields: [snapshotId, repositoryId, workspaceId], references: [id, repositoryId, workspaceId], onDelete: Cascade)
+
+  @@unique([snapshotId, repositoryId, workspaceId])
+  @@index([workspaceId, repositoryId])
+}
+
 model SourceFile {
+  contentText   String?
   id            String             @id @default(uuid()) @db.Uuid
   workspaceId   String             @db.Uuid
   repositoryId  String             @db.Uuid
@@ -190,36 +345,82 @@ model DependencyEdge {
 }
 
 model BusinessFeature {
-  id           String           @id @default(uuid()) @db.Uuid
-  workspaceId  String           @db.Uuid
-  repositoryId String           @db.Uuid
-  key          String           @db.VarChar(100)
-  name         String           @db.VarChar(150)
-  description  String?
-  createdAt    DateTime         @default(now())
-  repository   Repository       @relation(fields: [repositoryId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
-  mappings     FeatureMapping[]
-  findings     Finding[]
+  testMappings     FeatureTestMapping[]
+  criticality      String               @default("MEDIUM") @db.VarChar(20)
+  responsibleTeam  String?              @db.VarChar(150)
+  customerWorkflow String?
+  version          Int                  @default(1)
+  updatedAt        DateTime             @updatedAt
+  id               String               @id @default(uuid()) @db.Uuid
+  workspaceId      String               @db.Uuid
+  repositoryId     String               @db.Uuid
+  key              String               @db.VarChar(100)
+  name             String               @db.VarChar(150)
+  description      String?
+  createdAt        DateTime             @default(now())
+  repository       Repository           @relation(fields: [repositoryId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+  mappings         FeatureMapping[]
+  findings         Finding[]
 
   @@unique([id, repositoryId, workspaceId])
   @@unique([workspaceId, repositoryId, key])
 }
 
 model FeatureMapping {
-  id           String          @id @default(uuid()) @db.Uuid
-  workspaceId  String          @db.Uuid
-  repositoryId String          @db.Uuid
-  featureId    String          @db.Uuid
-  snapshotId   String          @db.Uuid
-  fileId       String          @db.Uuid
-  rationale    String
-  feature      BusinessFeature @relation(fields: [featureId, repositoryId, workspaceId], references: [id, repositoryId, workspaceId], onDelete: Cascade)
-  file         SourceFile      @relation(fields: [fileId, snapshotId, repositoryId, workspaceId], references: [id, snapshotId, repositoryId, workspaceId], onDelete: Cascade)
+  nodeId           String            @default("")
+  target           Json?
+  anchorHash       String?           @db.Char(64)
+  status           String            @default("NEEDS_REVIEW") @db.VarChar(30)
+  origin           String            @default("LEGACY") @db.VarChar(20)
+  heuristic        Json?
+  version          Int               @default(1)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  confirmedAt      DateTime?
+  confirmedById    String?           @db.Uuid
+  confirmedByLabel String?
+  confirmedBy      User?             @relation("MappingConfirmer", fields: [confirmedById], references: [id], onDelete: SetNull)
+  history          MappingRevision[]
+  id               String            @id @default(uuid()) @db.Uuid
+  workspaceId      String            @db.Uuid
+  repositoryId     String            @db.Uuid
+  featureId        String            @db.Uuid
+  snapshotId       String            @db.Uuid
+  fileId           String            @db.Uuid
+  rationale        String
+  feature          BusinessFeature   @relation(fields: [featureId, repositoryId, workspaceId], references: [id, repositoryId, workspaceId], onDelete: Cascade)
+  file             SourceFile        @relation(fields: [fileId, snapshotId, repositoryId, workspaceId], references: [id, snapshotId, repositoryId, workspaceId], onDelete: Cascade)
 
-  @@unique([workspaceId, repositoryId, featureId, snapshotId, fileId])
+  @@unique([id, repositoryId, workspaceId])
+  @@unique([workspaceId, repositoryId, featureId, snapshotId, fileId, nodeId], map: "FeatureMapping_target_key")
+}
+
+model MappingRevision {
+  id           String             @id @default(uuid()) @db.Uuid
+  mappingId    String             @db.Uuid
+  workspaceId  String             @db.Uuid
+  repositoryId String             @db.Uuid
+  revision     Int
+  action       String             @db.VarChar(30)
+  actorId      String?            @db.Uuid
+  actorLabel   String
+  snapshotId   String             @db.Uuid
+  state        Json
+  createdAt    DateTime           @default(now())
+  mapping      FeatureMapping     @relation(fields: [mappingId, repositoryId, workspaceId], references: [id, repositoryId, workspaceId], onDelete: Cascade)
+  actor        User?              @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  snapshot     RepositorySnapshot @relation(fields: [snapshotId, repositoryId, workspaceId], references: [id, repositoryId, workspaceId], onDelete: NoAction)
+
+  @@unique([mappingId, revision])
+  @@index([workspaceId, repositoryId])
 }
 
 model Analysis {
+  input           Json?
+  result          Json?
+  inputHash       String?              @db.Char(64)
+  resultHash      String?              @db.Char(64)
+  engineVersion   String?              @db.VarChar(30)
   id              String               @id @default(uuid()) @db.Uuid
   workspaceId     String               @db.Uuid
   repositoryId    String               @db.Uuid
@@ -301,6 +502,7 @@ model FindingEvidence {
 }
 
 model TestRun {
+  recordedAt    DateTime?
   id            String             @id @default(uuid()) @db.Uuid
   workspaceId   String             @db.Uuid
   repositoryId  String             @db.Uuid
@@ -376,6 +578,14 @@ model RecommendationEvidence {
 }
 
 model ReviewDecision {
+  revision Int @default(1)
+  recordVersion Int @default(1)
+  baseSha String? @db.VarChar(64)
+  headSha String? @db.VarChar(64)
+  analysisResultHash String? @db.Char(64)
+  reviewerLabel String? @db.VarChar(100)
+  isOverride Boolean @default(false)
+  concerns Json?
   id           String        @id @default(uuid()) @db.Uuid
   workspaceId  String        @db.Uuid
   repositoryId String        @db.Uuid
@@ -388,9 +598,54 @@ model ReviewDecision {
   reviewer     User          @relation(fields: [reviewerId], references: [id], onDelete: Restrict)
 
   @@index([workspaceId, repositoryId, analysisId, createdAt])
+  @@unique([analysisId, revision])
+}
+
+model TestArtifact {
+  id              String               @id @default(uuid()) @db.Uuid
+  workspaceId     String               @db.Uuid
+  repositoryId    String               @db.Uuid
+  format          String               @db.VarChar(20)
+  commitSha       String               @db.VarChar(64)
+  runner          String               @db.VarChar(100)
+  recordedAt      DateTime
+  importedAt      DateTime             @default(now())
+  filename        String               @db.VarChar(200)
+  source          String               @db.VarChar(1000)
+  sourceRoot      String?              @db.VarChar(2000)
+  contentHash     String               @db.Char(64)
+  content         String
+  parsed          Json
+  importedByLabel String               @db.VarChar(100)
+  repository      Repository           @relation(fields: [repositoryId, workspaceId], references: [id, workspaceId], onDelete: Cascade)
+  mappings        FeatureTestMapping[]
+
+  @@unique([id, repositoryId, workspaceId], map: "TestArtifact_scope_key")
+  @@index([workspaceId, repositoryId, recordedAt], map: "TestArtifact_scope_time")
+}
+
+model FeatureTestMapping {
+  id           String          @id @default(uuid()) @db.Uuid
+  workspaceId  String          @db.Uuid
+  repositoryId String          @db.Uuid
+  featureId    String          @db.Uuid
+  artifactId   String          @db.Uuid
+  testIdentity String          @db.VarChar(1000)
+  runner       String          @db.VarChar(100)
+  rationale    String          @db.VarChar(2000)
+  actorLabel   String          @db.VarChar(100)
+  createdAt    DateTime        @default(now())
+  feature      BusinessFeature @relation(fields: [featureId, repositoryId, workspaceId], references: [id, repositoryId, workspaceId], onDelete: Cascade)
+  artifact     TestArtifact    @relation(fields: [artifactId, repositoryId, workspaceId], references: [id, repositoryId, workspaceId], onDelete: NoAction)
+
+  @@unique([featureId, runner, testIdentity], map: "FeatureTestMapping_unique")
+  @@index([workspaceId, repositoryId], map: "FeatureTestMapping_scope")
 }
 
 model AuditEvent {
+  // Original repository identity survives parent deletion. The migration uses
+  // PostgreSQL's column-specific SET NULL for the live composite relation.
+  repositoryRef String? @db.Uuid
   id           String      @id @default(uuid()) @db.Uuid
   workspaceId  String      @db.Uuid
   repositoryId String?     @db.Uuid

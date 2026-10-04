@@ -1,4 +1,6 @@
 import { z } from 'zod';
+export * from './graph';
+export * from './features';
 export const healthSchema = z.object({
   status: z.enum(['ok', 'unavailable']),
   service: z.literal('impactlens-api'),
@@ -30,3 +32,8 @@ export interface CurrentUserResponse {
   csrfToken: string;
   expiresAt: string;
 }
+export * from './impact';
+export * from './test-evidence';
+export * from './explanations';
+export * from './reviews';
+export * from './repository';

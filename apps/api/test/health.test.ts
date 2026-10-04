@@ -16,12 +16,20 @@ class ValidationProbe {
     return body;
   }
 }
+@Controller(
+  'workspaces/:workspaceId/repositories/:repositoryId/test-evidence/artifacts',
+)
+class ArtifactProbe {
+  @Post() create(@Body() body: ValidationDto) {
+    return body;
+  }
+}
 describe('HTTP foundation', () => {
   let app: INestApplication;
   const check = jest.fn();
   beforeAll(async () => {
     const module = await Test.createTestingModule({
-      controllers: [ValidationProbe, HealthController],
+      controllers: [ValidationProbe, ArtifactProbe, HealthController],
       providers: [DependenciesService],
     })
       .overrideProvider(DependenciesService)
@@ -72,5 +80,33 @@ describe('HTTP foundation', () => {
         'name must be a string',
       ]),
     );
+  });
+  it('parses ordinary JSON and reserves larger bodies for artifact uploads', async () => {
+    const server = request(app.getHttpServer());
+    const valid = await server
+      .post('/api/validation-probe')
+      .send({ name: 'ordinary request' })
+      .expect(201);
+    expect(valid.body).toEqual({ name: 'ordinary request' });
+    const body = { name: 'a'.repeat(110000) };
+    await server.post('/api/validation-probe').send(body).expect(413);
+    const uploaded = await server
+      .post('/api/workspaces/w/repositories/r/test-evidence/artifacts')
+      .send(body)
+      .expect(201);
+    expect(uploaded.body).toEqual(body);
+  });
+  it('retains request IDs for malformed artifact JSON', async () => {
+    const result = await request(app.getHttpServer())
+      .post('/api/workspaces/w/repositories/r/test-evidence/artifacts')
+      .set('Content-Type', 'application/json')
+      .set('x-request-id', 'artifact-error')
+      .send('{')
+      .expect(400);
+    expect(result.body.error).toMatchObject({
+      code: 'HTTP_400',
+      requestId: 'artifact-error',
+    });
+    expect(result.headers['x-request-id']).toBe('artifact-error');
   });
 });

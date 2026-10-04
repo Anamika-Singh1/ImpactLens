@@ -1,5 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { apiRequest, useAuth } from './session';
+import { Link } from 'react-router-dom';
+import { RepositoryAccess } from './RepositoryAccess';
+import { AddRepository } from './AddRepository';
 type Repository = { id: string; owner: string; name: string };
 export function Repositories() {
   const { workspace } = useAuth();
@@ -52,14 +55,42 @@ export function Repositories() {
       setBusy(false);
     }
   }
+  async function remove(repo: Repository) {
+    if (
+      !workspace ||
+      !window.confirm(
+        `Delete ${repo.owner}/${repo.name} and all its snapshots, saved comparisons, reviews and test artifacts? This cannot be undone.`,
+      )
+    )
+      return;
+    setBusy(true);
+    setError('');
+    try {
+      await apiRequest(`/workspaces/${workspace.id}/repositories/${repo.id}`, {
+        method: 'DELETE',
+      });
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Unable to delete repository');
+    } finally {
+      setBusy(false);
+    }
+  }
   return (
     <>
       <p className="eyebrow">WORKSPACE / REPOSITORIES</p>
       <h1>Repositories</h1>
       <p className="subtitle">
-        Register repository metadata. No code is fetched, and this does not
-        grant GitHub access.
+        Import your repository from GitHub, then explore its source and static
+        dependencies.
       </p>
+      <AddRepository key={workspace?.id} />
+      {workspace && (
+        <details className="panel">
+          <summary>GitHub access, sample imports and import history</summary>
+          <RepositoryAccess key={workspace.id} imports onRegistered={load} />
+        </details>
+      )}
       {error && (
         <div className="error" role="alert">
           {error}
@@ -73,10 +104,23 @@ export function Repositories() {
           <ul>
             {repos.map((repo) => (
               <li key={repo.id}>
-                <strong>
-                  {repo.owner}/{repo.name}
-                </strong>
-                <p className="small muted">Metadata only · Not imported</p>
+                <Link to={`/repositories/${repo.id}`}>
+                  <strong>
+                    {repo.owner}/{repo.name}
+                  </strong>
+                </Link>
+                <p className="small muted">
+                  Open repository to view snapshot availability.
+                </p>
+                {workspace?.role === 'OWNER' && (
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => void remove(repo)}
+                  >
+                    Delete {repo.owner}/{repo.name}
+                  </button>
+                )}
               </li>
             ))}
           </ul>
@@ -85,14 +129,18 @@ export function Repositories() {
         <section className="empty panel">
           <h2>No repositories registered</h2>
           <p>
-            Repository metadata is scoped to this workspace. GitHub import
-            arrives in a later phase.
+            Repository metadata and imported snapshots are scoped to this
+            workspace.
           </p>
         </section>
       )}
       {workspace && workspace.role !== 'VIEWER' && (
         <section className="panel">
-          <h2>Register repository metadata</h2>
+          <h2>Register repository metadata only</h2>
+          <p className="small muted">
+            This creates a listing without importing code. Use GitHub import
+            above to view a repository.
+          </p>
           <form onSubmit={submit}>
             <label>
               GitHub owner

@@ -1,4 +1,267 @@
 @import 'tailwindcss';
+.feature-catalog {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+  gap: 20px;
+}
+.feature-form {
+  display: grid;
+  gap: 16px;
+  max-width: 780px;
+  margin-top: 20px;
+}
+.feature-form textarea {
+  width: 100%;
+  border: 1px solid #cbd9d1;
+  border-radius: 7px;
+  padding: 10px;
+  font: inherit;
+  resize: vertical;
+}
+.feature-form label {
+  display: grid;
+  gap: 8px;
+  font-size: 14px;
+}
+.feature-description {
+  white-space: pre-wrap;
+}
+.feature-metadata {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 12px;
+  margin: 24px 0;
+}
+.feature-metadata dt {
+  font-weight: 600;
+}
+.feature-metadata dd {
+  margin: 0;
+  white-space: pre-wrap;
+}
+.feature-open {
+  display: inline-block;
+  margin-top: 16px;
+  font-weight: 600;
+  color: #216a51;
+}
+.mapping-badges,
+.mapping-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin: 12px 0;
+}
+.mapping-actions a {
+  text-decoration: underline;
+  font-size: 13px;
+}
+.criticality,
+.mapping-badge {
+  border-radius: 5px;
+  font-size: 12px;
+  padding: 5px 9px;
+  background: #edf2ef;
+  color: #334d43;
+  font-weight: 600;
+}
+.criticality-critical,
+.mapping-badge.stale,
+.mapping-badge.needs_review {
+  color: #8a3022;
+  background: #ffede7;
+}
+.criticality-high,
+.mapping-badge.suggested {
+  color: #765009;
+  background: #fff4ce;
+  border: 1px dashed #b08a37;
+}
+.mapping-badge.confirmed {
+  color: #18523c;
+  background: #d8f1e3;
+}
+.mapping-badge.rejected {
+  color: #5c6260;
+  background: #eee;
+}
+.mapping-badge.resolved {
+  border: 1px solid #cbd9d1;
+}
+.mapping-record {
+  margin-top: 20px;
+  padding: 20px;
+  border: 1px solid #cbd9d1;
+  border-left: 4px solid #368065;
+  border-radius: 8px;
+  overflow-wrap: anywhere;
+}
+.mapping-suggested {
+  border-style: dashed;
+  border-left-color: #b08a37;
+  background: #fffdf6;
+}
+.mapping-needs_review {
+  border-left-color: #bb603f;
+}
+.mapping-rejected {
+  border-left-color: #929a94;
+  background: #f7f8f7;
+}
+.mapping-review-reason {
+  padding: 12px;
+  background: #fff0e8;
+  color: #843d26;
+  border-radius: 6px;
+}
+.mapping-history {
+  padding-left: 22px;
+}
+.mapping-history li {
+  padding: 12px 0;
+  border-bottom: 1px solid #e1e8e3;
+}
+.suggestion-callout {
+  margin-top: 30px;
+  padding: 20px;
+  background: #fffaf0;
+  border: 1px dashed #b08a37;
+  border-radius: 8px;
+}
+.feature-notice {
+  padding: 14px;
+  background: #e3f3e9;
+  border-radius: 8px;
+}
+@media (max-width: 650px) {
+  .feature-metadata {
+    grid-template-columns: 1fr;
+  }
+}
+.explorer-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.explorer-toolbar label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.explorer-source-grid {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(0, 3fr);
+  gap: 20px;
+}
+.explorer-files {
+  max-height: 580px;
+  overflow: auto;
+}
+.explorer-tree {
+  list-style: none;
+  padding-left: 14px;
+  font-size: 12px;
+}
+.explorer-tree button {
+  border: 0;
+  padding: 5px;
+  background: transparent;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.explorer-tree .selected {
+  background: #d0eddf;
+  font-weight: 700;
+}
+.explorer-preview {
+  min-width: 0;
+}
+.explorer-preview p {
+  overflow-wrap: anywhere;
+}
+.explorer-preview pre {
+  max-height: 460px;
+  overflow: auto;
+  font-size: 12px;
+  background: #f4f8f5;
+  padding: 12px;
+  line-height: 1.6;
+  tab-size: 2;
+}
+.source-line {
+  display: block;
+  width: max-content;
+  min-width: 100%;
+}
+.line-number {
+  display: inline-block;
+  width: 42px;
+  user-select: none;
+  color: #82958c;
+}
+.highlighted {
+  background: #d0eddf;
+}
+.graph-scroll {
+  max-height: 540px;
+  overflow: auto;
+  margin: 20px 0;
+  background: #f5f8f6;
+  border-radius: 10px;
+}
+.graph-scroll svg {
+  width: 100%;
+  min-width: 660px;
+}
+.graph-scroll g[role='button'] {
+  cursor: pointer;
+}
+.graph-scroll g:focus rect {
+  stroke: #111;
+  stroke-width: 3px;
+}
+.explorer-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.edge-details {
+  list-style: none;
+  padding: 0;
+  max-height: 360px;
+  overflow: auto;
+}
+.edge-details li {
+  padding: 12px 0;
+  border-bottom: 1px solid #d7e0db;
+  overflow-wrap: anywhere;
+}
+.limitations-list {
+  max-height: 420px;
+  overflow: auto;
+}
+.limitations-list details {
+  border-top: 1px solid #d7e0db;
+  padding: 12px 0;
+}
+summary {
+  cursor: pointer;
+}
+select {
+  max-width: 100%;
+}
+@media (max-width: 900px) {
+  .explorer-source-grid,
+  .explorer-details-grid {
+    grid-template-columns: 1fr;
+  }
+  .explorer-files {
+    max-height: 260px;
+  }
+}
 :root {
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
   color: #193b36;
@@ -532,4 +795,118 @@ button.primary:hover:not(:disabled) {
     align-items: flex-start;
     flex-direction: column;
   }
+}
+:root .comparison-form label {
+  display: grid;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+.comparison-form select {
+  width: 100%;
+  max-width: 100%;
+}
+.comparison-meta,
+.impact-path {
+  overflow-wrap: anywhere;
+}
+.impact-path {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border, #dde3eb);
+}
+.impact-feature h4 {
+  margin-bottom: 0.5rem;
+}
+.evidence-form {
+  display: grid;
+  gap: 16px;
+  margin: 20px 0;
+}
+.evidence-form label {
+  display: grid;
+  gap: 6px;
+}
+.evidence-form input,
+.evidence-form select {
+  width: 100%;
+}
+.artifact-list li,
+.test-recommendation {
+  padding: 16px 0;
+  border-bottom: 1px solid #dde3eb;
+}
+.artifact-detail,
+.test-recommendations,
+.artifact-list {
+  overflow-wrap: anywhere;
+}
+.test-recommendation h3 {
+  margin: 8px 0;
+}
+/* Preserve reviewer formatting while rendering all repository and user text safely. */
+.review-rationale {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.release-review textarea {
+  width: 100%;
+  font: inherit;
+}
+.release-review .actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+/* GitHub authorization and snapshot import controls. */
+.import-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.75rem 0;
+}
+.import-job {
+  padding: 1rem 0;
+  border-top: 1px solid #d8e2dd;
+}
+.import-job progress {
+  display: block;
+  width: min(100%, 28rem);
+  margin-bottom: 0.75rem;
+}
+.import-job > a {
+  display: inline-block;
+  margin-right: 0.75rem;
+}
+.repository-tabs,
+.repository-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+.repository-tabs button[aria-current='page'] {
+  background: #216a51;
+  color: white;
+}
+.repository-steps {
+  padding-left: 1.5rem;
+}
+.repository-steps li {
+  margin-right: 1.5rem;
+}
+.repository-steps li[aria-current='step'] {
+  font-weight: 700;
+  color: #216a51;
+}
+.implementation-excerpt {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 0.85rem;
+  background: #f2f7f4;
+  padding: 0.75rem;
+}
+.table-scroll {
+  overflow-x: auto;
 }

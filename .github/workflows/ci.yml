@@ -1,7 +1,31 @@
 name: CI
 on: [push, pull_request]
+permissions:
+  contents: read
 jobs:
+  controlled-fixture-benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run env:init
+      - run: npm run db:generate
+      - run: npm run build
+      - run: npm run benchmark
+        env:
+          BENCHMARK_REPEATS: '5'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: controlled-commerce-benchmark
+          path: benchmark-results/
   verify:
+    timeout-minutes: 25
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -10,13 +34,16 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm run lint
       - run: npm run format:check
       - run: npm run env:init
       - run: npm run services:up
       - run: npm run db:generate
       - run: npm run db:migrate
       - run: npm run check:migrations
+      - run: npm run check:feature-upgrade
       - run: npm run build
+      - run: npm run typecheck
       - run: npm test
       - run: npm run test:integration
       - run: npm run check:env

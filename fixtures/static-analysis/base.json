@@ -1,0 +1,14 @@
+{
+  "tsconfig.json": "{ // inert JSONC\n \"compilerOptions\": {\"baseUrl\": \".\", \"paths\": {\"@core/*\": [\"src/core/*\"], \"@handler\": [\"src/handler.ts\"]}} }",
+  "src/core/math.ts": "export function sum(a: number, b: number) {\n  return a + b;\n}\nexport class Calculator {}\nconst local = 1;\nexport { local as value };\n",
+  "src/barrel.ts": "export { sum as add } from './core/math';\nexport * from './cycle/a';\n",
+  "src/main.ts": "import { sum } from '@core/math';\nimport { add } from './barrel';\nimport './deleted';\nexport const result = sum(1, 2);\nconst lazy = import('./core/math');\nconst unknown = import('./plugins/' + name);\n",
+  "src/cycle/a.ts": "import { b } from './b';\nexport const a = () => b();\n",
+  "src/cycle/b.ts": "import { a } from './a';\nexport const b = () => a();\n",
+  "src/deleted.ts": "export function obsolete() { return 1; }\n",
+  "src/isolated.ts": "export const isolated = 42;\n",
+  "src/handler.ts": "export function auth(req, res, next) { next(); }\nexport function handler(req, res) { res.send('ok'); }\n",
+  "src/server.ts": "import express, { Router as makeRouter } from 'express';\nimport { auth, handler } from '@handler';\nconst app = express();\nconst router = makeRouter();\napp.get('/items', auth, handler);\nrouter.post('/items', (req, res) => res.send('ok'));\napp.use('/api', router);\napp.get(path, handler);\napp.route('/chain').get(handler);\nfunction unrelated(app) { app.get('/not-express', handler); }\n",
+  "src/View.tsx": "import { sum } from './core/math';\nexport function View() { return <main>{sum(1, 2)}</main>; }\nexport const Badge = () => <span>Ready</span>;\nexport class Panel { render() { return <section />; } }\n",
+  "src/unsupported.ts": "namespace Legacy { export const x = 1; }\nmodule.exports = Legacy;\nconst dependency = require(name);\n"
+}

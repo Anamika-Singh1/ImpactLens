@@ -27,7 +27,9 @@ test('Owner settings and repository metadata persist through the real backend', 
   await page.goto('/settings');
   await page.getByLabel('Workspace name').fill('Release review team');
   await page.getByRole('button', { name: 'Save workspace' }).click();
-  await expect(page.getByRole('status')).toHaveText('Workspace updated.');
+  await expect(
+    page.getByRole('status').filter({ hasText: 'Workspace updated.' }),
+  ).toHaveText('Workspace updated.');
   await page.reload();
   await expect(page.getByLabel('Workspace name')).toHaveValue(
     'Release review team',

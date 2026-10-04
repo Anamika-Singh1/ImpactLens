@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "dev": "nodemon --watch src --watch ../../packages/shared/dist --ext ts,js --exec ts-node src/main.ts",
+    "dev": "nodemon --watch src --watch ../../packages/shared/dist --watch ../../packages/ingestion/dist --ext ts,js --exec ts-node src/main.ts",
     "start": "node dist/main.js",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
@@ -12,6 +12,7 @@
     "test:integration": "jest --config jest.integration.config.cjs --runInBand"
   },
   "dependencies": {
+    "@impactlens/analyzer": "0.1.0",
     "@impactlens/shared": "0.1.0",
     "@nestjs/common": "^11.1.0",
     "@nestjs/core": "^11.1.0",
@@ -25,7 +26,9 @@
     "ioredis": "^5.8.2",
     "pino": "^9.14.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.2"
+    "rxjs": "^7.8.2",
+    "@impactlens/ingestion": "0.1.0",
+    "bullmq": "^5.61.0"
   },
   "devDependencies": {
     "@nestjs/testing": "^11.1.0",

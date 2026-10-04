@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "tests": [
+    {
+      "identity": "checkout-success",
+      "name": "Checkout succeeds",
+      "path": "tests/checkout.test.ts",
+      "covers": [{ "path": "src/checkout.ts", "lines": [2] }]
+    },
+    {
+      "identity": "checkout-declined",
+      "name": "Checkout declines invalid card",
+      "path": "tests/checkout.test.ts",
+      "covers": [
+        {
+          "path": "src/checkout.ts",
+          "symbol": { "name": "checkout", "startLine": 1, "endLine": 4 }
+        }
+      ]
+    },
+    {
+      "identity": "profile-load",
+      "name": "Profile loads",
+      "path": "tests/profile.test.ts",
+      "covers": [{ "path": "src/profile.ts" }]
+    }
+  ]
+}
